@@ -34,9 +34,9 @@ namespace ExampleMod
 
         public void Init()
         {
+            AeyosLogger.Log("ExampleModLogic:Init Adding controls");
             CreateControlList();
             MyAPIGateway.TerminalControls.CustomControlGetter += CustomControlGetter;
-            MyAPIGateway.Utilities.ShowMessage("", $"Custom Controls Added [{CustomControls.Count}]");
         }
 
         private void CustomControlGetter(IMyTerminalBlock block, List<IMyTerminalControl> ownControls)
@@ -56,7 +56,20 @@ namespace ExampleMod
 
         public sealed override void SaveData()
         {
+            AeyosLogger.Log("ExampleModLogic:SaveData");
             ExampleModMain.SaveData();
+        }
+
+        public sealed override void LoadData()
+        {
+            AeyosLogger.Log("ExampleModLogic:LoadData");
+            ExampleModMain.LoadData();
+        }
+
+        protected sealed override void UnloadData()
+        {
+            AeyosLogger.Log("ExampleModLogic:UnloadData Unloading world");
+            AeyosLogger.FreeWriter();
         }
 
         public override void UpdateBeforeSimulation()
@@ -103,12 +116,12 @@ namespace ExampleMod
             toggle.Title = MyStringId.GetOrCompute("Send messages from this block");
             toggle.Getter = (tBlock) => {
                 var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
-                return ebl.exampleToggle1 || false;
+                return ebl.blockData.exampleToggle1 || false;
             };
             toggle.Setter = (tBlock, value) =>
             {
                 var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
-                ebl.exampleToggle1 = value;
+                ebl.blockData.exampleToggle1 = value;
             };
             CustomControls.Add(toggle);
 
@@ -122,12 +135,12 @@ namespace ExampleMod
             toggle2.Title = MyStringId.GetOrCompute("Send messages from this block");
             toggle2.Getter = (tBlock) => {
                 var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
-                return ebl.exampleToggle2 || false;
+                return ebl.blockData.exampleToggle2 || false;
             };
             toggle2.Setter = (tBlock, value) =>
             {
                 var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
-                ebl.exampleToggle2 = value;
+                ebl.blockData.exampleToggle2 = value;
             };
             CustomControls.Add(toggle2);
 

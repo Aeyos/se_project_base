@@ -28,31 +28,26 @@ using VRageMath;
 
 namespace ExampleMod
 {
-    [XmlType("ScanSettings")]
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock), false, ExampleModMain.MainBlockSubtypeId)]
-    public class ExampleBlockLogic : MyGameLogicComponent
-    {
-        public bool exampleToggle1 = false;
-        public bool exampleToggle2 = false;
-        [XmlElement]
-        public long EntityId { get { return this.Entity.EntityId; } set { } }
-
+    public class ExampleBlockLogic : MyGameLogicComponent {
+        public ExampleBlockData blockData;
+    
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
+            AeyosLogger.Log($"ExampleBlockLogic:Init {this.Entity.EntityId}");
             base.Init(objectBuilder);
-            MyAPIGateway.Utilities.ShowMessage("help", "Mod initialized");
             NeedsUpdate = MyEntityUpdateEnum.EACH_100TH_FRAME;
-            ExampleModMain.AddBlock(this);
+            blockData = ExampleModMain.CreateOrLoadConfig(this);
         }
 
         public override void UpdateBeforeSimulation100()
         {
             base.UpdateBeforeSimulation100();
-            if (exampleToggle1)
+            if (blockData.exampleToggle1)
             {
                 MyAPIGateway.Utilities.ShowMessage("help", $"ExampleToggle1 from {this.Entity.EntityId}");
             }
-            if (exampleToggle2)
+            if (blockData.exampleToggle2)
             {
                 MyAPIGateway.Utilities.ShowMessage("help", $"ExampleToggle2 from {this.Entity.EntityId}");
             }
