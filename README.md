@@ -1,6 +1,16 @@
 # ABAI - Aeyos Base AI
 A Space Engineers mod that adds an AI block to help you manage your base.
 
+## TODO
+
+* Get current grid
+  * Create block finder function
+  * Get list of containers
+  * Get list of refineries
+  * Get list of asemblers
+  * Filter list for whitelisted/blacklisted containers
+  * Implement simple container sorting
+
 ## Planned Features
 
 - [X] Custom block for AI
@@ -26,6 +36,11 @@ A Space Engineers mod that adds an AI block to help you manage your base.
   - [ ] Custom AI faces
 - [ ] Auto-mine drill arm
 - [ ] Inter-grid funcionality (manage self/Manage self & docked)
+
+## Bugs
+
+* Block has no placeholder screen, screen only appears with content
+* Block has no category and only appears by searching in the G menu
 
 Helpful/Reference links:
 

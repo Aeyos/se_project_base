@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using VRage.Game.ModAPI;
 using Sandbox.ModAPI;
 
-namespace ExampleMod
+namespace AIBM
 {
     static internal class AeyosLogger
     {
@@ -39,7 +39,7 @@ namespace ExampleMod
             {
                 try
                 {
-                    writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(LogFileName, typeof(ExampleModMain));
+                    writer = MyAPIGateway.Utilities.WriteFileInWorldStorage(LogFileName, typeof(AeyosLogger));
                 }
                 catch {
                     return;

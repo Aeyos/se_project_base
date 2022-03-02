@@ -26,30 +26,30 @@ using VRage.ObjectBuilders;
 using VRage.Utils;
 using VRageMath;
 
-namespace ExampleMod
+namespace AIBM
 {
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock), false, ExampleModMain.MainBlockSubtypeId)]
-    public class ExampleBlockLogic : MyGameLogicComponent {
-        public ExampleBlockData blockData;
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock), false, AibmModMain.MainBlockSubtypeId)]
+    public class AibmBlockLogic : MyGameLogicComponent {
+        public AibmBlockData blockData;
     
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
-            AeyosLogger.Log($"ExampleBlockLogic:Init {this.Entity.EntityId}");
+            AeyosLogger.Log($"AIBMBlockLogic:Init {this.Entity.EntityId}");
             base.Init(objectBuilder);
             NeedsUpdate = MyEntityUpdateEnum.EACH_100TH_FRAME;
-            blockData = ExampleModMain.CreateOrLoadConfig(this);
+            blockData = AibmModMain.CreateOrLoadConfig(this);
         }
 
         public override void UpdateBeforeSimulation100()
         {
             base.UpdateBeforeSimulation100();
-            if (blockData.exampleToggle1)
+            if (blockData.shouldAlertOnEnemyClose)
             {
-                MyAPIGateway.Utilities.ShowMessage("help", $"ExampleToggle1 from {this.Entity.EntityId}");
+                MyAPIGateway.Utilities.ShowMessage("AIBM", $"Enemy Inbound. Protect me!");
             }
-            if (blockData.exampleToggle2)
+            if (blockData.shouldAlertOnLowItems)
             {
-                MyAPIGateway.Utilities.ShowMessage("help", $"ExampleToggle2 from {this.Entity.EntityId}");
+                MyAPIGateway.Utilities.ShowMessage("AIBM", $"I'm running low on items");
             }
         }
     }
