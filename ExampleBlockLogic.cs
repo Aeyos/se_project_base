@@ -27,10 +27,11 @@ using VRageMath;
 
 namespace ExampleMod
 {
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock), true, "ExampleBlock")]
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock),false, "ExampleBlock")]
     public class ExampleBlockLogic: MyGameLogicComponent
     {
-        Dictionary<IMyTerminalBlock, BlockConfig> Configurations = new Dictionary<IMyTerminalBlock, BlockConfig>();
+        public bool exampleToggle1 = false;
+        public bool exampleToggle2 = false;
 
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
@@ -42,7 +43,14 @@ namespace ExampleMod
         public override void UpdateBeforeSimulation100()
         {
             base.UpdateBeforeSimulation100();
-            MyAPIGateway.Utilities.ShowMessage("help", "Abuble");
+            if (exampleToggle1)
+            {
+                MyAPIGateway.Utilities.ShowMessage("help", $"ExampleToggle1 from {this.Entity.EntityId}");
+            }
+            if (exampleToggle2)
+            {
+                MyAPIGateway.Utilities.ShowMessage("help", $"ExampleToggle2 from {this.Entity.EntityId}");
+            }
         }
     }
 }

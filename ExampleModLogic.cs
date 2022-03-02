@@ -130,24 +130,13 @@ namespace ExampleMod
             toggle.OnText = MyStringId.GetOrCompute("HudInfoOn");
             toggle.OffText = MyStringId.GetOrCompute("HudInfoOff");
             toggle.Getter = (tBlock) => {
-                if (Configurations.ContainsKey(tBlock))
-                {
-                    return Configurations[tBlock].exampleToggle1;
-                }
-                return false;
+                var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
+                return ebl.exampleToggle1 || false;
             };
             toggle.Setter = (tBlock, value) =>
             {
-                if (Configurations.ContainsKey(tBlock) == false)
-                {
-                    var bc = new BlockConfig();
-                    bc.exampleToggle1 = value;
-                    Configurations.Add(tBlock, bc);
-                }
-                else
-                {
-                    Configurations[tBlock].exampleToggle1 = value;
-                }
+                var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
+                ebl.exampleToggle1 = value;
             };
             controlList.Add(toggle);
 
@@ -159,24 +148,13 @@ namespace ExampleMod
             toggle2.OnText = MyStringId.GetOrCompute("HudInfoOn");
             toggle2.OffText = MyStringId.GetOrCompute("HudInfoOff");
             toggle2.Getter = (tBlock) => {
-                if (Configurations.ContainsKey(tBlock))
-                {
-                    return Configurations[tBlock].exampleToggle2;
-                }
-                return false;
+                var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
+                return ebl.exampleToggle2 || false;
             };
             toggle2.Setter = (tBlock, value) =>
             {
-                if (Configurations.ContainsKey(tBlock) == false)
-                {
-                    var bc = new BlockConfig();
-                    bc.exampleToggle2 = value;
-                    Configurations.Add(tBlock, bc);
-                }
-                else
-                {
-                    Configurations[tBlock].exampleToggle2 = value;
-                }
+                var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
+                ebl.exampleToggle2 = value;
             };
             controlList.Add(toggle2);
 
