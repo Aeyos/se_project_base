@@ -1,14 +1,38 @@
-# se_project_base
-Base project for SE
+# ABAI - Aeyos Base AI
+A Space Engineers mod that adds an AI block to help you manage your base.
 
-To help kickstart SE Mods
+## Planned Features
 
-Helpful links:
+- [X] Custom block for AI
+- [X] Custom Options for AI
+  - [ ] Configuration Location (Title/Data)
+  - [ ] Auto-sort containers (On/Off)
+  - [ ] Auto-assign containers (On/Off)
+  - [ ] Sort items alphabetically (On/Off)
+  - [ ] Controlled assemblers (On/Off)
+  - [ ] Auto-adjust solar panels (On/Off)
+  - [ ] Low item alerts (On/Off)
+  - [ ] Low power alerts (On/Off)
+  - [ ] Low storage alerts (On/Off)
+  - [ ] Enemy proximity alerts (On/Off)
+  - [ ] Turn off Refineries on low Power (On/Off)
+  - [ ] Turn off Assemblers on low Power (On/Off)
+- [ ] Quota for Ores/Ingots/Components/Items
+- [ ] Display quota, info, etc on LCD's
+  - [ ] Custom LCD script for eye-candy info
+- [ ] AI Customization
+  - [ ] Name your AI for custom messages
+  - [ ] LCD that displays AI "emotions"
+  - [ ] Custom AI faces
+- [ ] Auto-mine drill arm
+- [ ] Inter-grid funcionality (manage self/Manage self & docked)
 
-[Quick Intro to Space Engineers Modding · THDigi/SE-ModScript-Examples Wiki](https://github.com/THDigi/SE-ModScript-Examples/wiki/Quick-Intro-to-Space-Engineers-Modding)
+Helpful/Reference links:
 
-[space-engineers-fan-docs/main.md at master · cdrch/space-engineers-fan-docs](https://github.com/cdrch/space-engineers-fan-docs/blob/master/modding-introduction/main.md#what-can-i-mod-)
+[Digi SE Modding Wiki](https://github.com/THDigi/SE-ModScript-Examples/wiki/Quick-Intro-to-Space-Engineers-Modding)
 
-[Sandbox.ModAPI Namespace](https://bloc97.github.io/SpaceEngineersModAPIDocs/html/b2d609dc-672a-3d90-cdc0-3753ce60d06f.htm)
+[cdrch Fan Docs](https://github.com/cdrch/space-engineers-fan-docs/blob/master/modding-introduction/main.md#what-can-i-mod-)
 
-[https://github.com/malware-dev/MDK-SE](https://github.com/malware-dev/MDK-SE)
+[bloc97's SEAPI Doc](https://bloc97.github.io/SpaceEngineersModAPIDocs/html/b2d609dc-672a-3d90-cdc0-3753ce60d06f.htm)
+
+[Malware DEV](https://github.com/malware-dev/MDK-SE)
