@@ -4,24 +4,24 @@
 		<Definition xsi:type="MyObjectBuilder_LCDPanelsBlockDefinition">
 			<Id>
 				<TypeId>LCDPanelsBlock</TypeId>
-				<SubtypeId>ExampleBlock</SubtypeId>
+				<SubtypeId>AIBMBlock</SubtypeId>
 			</Id>
 			<Public>true</Public>
-			<DisplayName>ExampleBlock</DisplayName>
-			<Icon>Textures\GUI\Icons\AstronautBackpack.dds</Icon>
-			<Description>Description_ProgrammableBlock</Description>
+			<DisplayName>AI Base Manager</DisplayName>
+			<Icon>Textures\GUI\Icons\AIBMBlock.dds</Icon>
+			<Description>Artificial Intelligence Base Manager - takes care of base subsystems so you don't have to</Description>
 			<CubeSize>Large</CubeSize>
 			<BlockTopology>TriangleMesh</BlockTopology>
 			<Size x="1" y="1" z="1" />
 			<ModelOffset x="0" y="0" z="0" />
-			<Model>Models\Cubes\large\ExampleBlock.mwm</Model>
+			<Model>Models\Cubes\large\AIBMBlock.mwm</Model>
 			<Components>
-				<Component Subtype="SteelPlate" Count="11" />
-				<Component Subtype="Construction" Count="4" />
+				<Component Subtype="SteelPlate" Count="50" />
+				<Component Subtype="Construction" Count="20" />
 				<Component Subtype="LargeTube" Count="2" />
 				<Component Subtype="Motor" Count="1" />
-				<Component Subtype="Display" Count="1" />
-				<Component Subtype="Computer" Count="2" />
+				<Component Subtype="Display" Count="10" />
+				<Component Subtype="Computer" Count="20" />
 				<Component Subtype="SteelPlate" Count="10" />
 			</Components>
 			<CriticalComponent Subtype="Computer" Index="0" />
@@ -33,11 +33,10 @@
 			<ScreenAreas>
 				<ScreenArea Name="CockpitScreen_01" DisplayName="DisplayName_Screen_Large" TextureResolution="512" ScreenWidth="1" ScreenHeight="1" />
 			</ScreenAreas>
-			<BlockPairName>ExampleBlock</BlockPairName>
+			<BlockPairName>AIBMBlock</BlockPairName>
 			<EdgeType>Light</EdgeType>
 			<BuildTimeSeconds>20</BuildTimeSeconds>
 			<MountPoints>
-				<MountPoint Side="Front" StartX="0.00" StartY="0.00" EndX="1.00" EndY="1.00"/>
 				<MountPoint Side="Back" StartX="0.00" StartY="0.00" EndX="1.00" EndY="1.00"/>
 				<MountPoint Side="Left" StartX="0.00" StartY="0.00" EndX="1.00" EndY="1.00"/>
 				<MountPoint Side="Right" StartX="0.00" StartY="0.00" EndX="1.00" EndY="1.00"/>
@@ -56,7 +55,7 @@
 	</CubeBlocks>
 	<BlockPositions>
 		<BlockPosition>
-			<Name>ExampleBlock</Name>
+			<Name>AIBMBlock</Name>
 			<Position>
 				<X>1</X>
 				<Y>1</Y>
