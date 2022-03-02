@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 	<CubeBlocks>
-		<Definition>
+		<Definition xsi:type="MyObjectBuilder_LCDPanelsBlockDefinition">
 			<Id>
-				<TypeId>CubeBlock</TypeId>
+				<TypeId>LCDPanelsBlock</TypeId>
 				<SubtypeId>ExampleBlock</SubtypeId>
 			</Id>
 			<Public>true</Public>
@@ -31,8 +31,7 @@
 				<Model BuildPercentUpperBound="1.00" File="Models\Cubes\Large\ProgrammingBlockConstruction_3.mwm" />
 			</BuildProgressModels>
 			<ScreenAreas>
-				<ScreenArea Name="CockpitScreen_02" DisplayName="DisplayName_Screen_Large" TextureResolution="512" ScreenWidth="16" ScreenHeight="10" />
-				<ScreenArea Name="CockpitScreen_01" DisplayName="DisplayName_Screen_Keyboard" TextureResolution="256" ScreenWidth="5" ScreenHeight="2" />
+				<ScreenArea Name="CockpitScreen_01" DisplayName="DisplayName_Screen_Large" TextureResolution="512" ScreenWidth="1" ScreenHeight="1" />
 			</ScreenAreas>
 			<BlockPairName>ExampleBlock</BlockPairName>
 			<EdgeType>Light</EdgeType>
@@ -59,8 +58,8 @@
 		<BlockPosition>
 			<Name>ExampleBlock</Name>
 			<Position>
-				<X>0</X>
-				<Y>16</Y>
+				<X>1</X>
+				<Y>1</Y>
 			</Position>
 		</BlockPosition>
 	</BlockPositions>

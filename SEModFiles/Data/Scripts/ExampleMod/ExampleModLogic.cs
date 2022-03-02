@@ -27,23 +27,36 @@ using VRageMath;
 
 namespace ExampleMod
 {
-    class BlockConfig
-    {
-        public bool exampleToggle1 = false;
-        public bool exampleToggle2 = false;
-    }
-
-
     [MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
-    public class ExampleModLogic : MySessionComponentBase
-    {
-        Dictionary<IMyTerminalBlock, BlockConfig> Configurations = new Dictionary<IMyTerminalBlock, BlockConfig>();
+    public class ExampleModLogic : MySessionComponentBase {
         private bool _Init = false;
+        List<IMyTerminalControl> CustomControls = new List<IMyTerminalControl>();
 
         public void Init()
         {
-            CreateControls();
-            MyAPIGateway.Utilities.ShowMessage("", "Custom Controls Added");
+            CreateControlList();
+            MyAPIGateway.TerminalControls.CustomControlGetter += CustomControlGetter;
+            MyAPIGateway.Utilities.ShowMessage("", $"Custom Controls Added [{CustomControls.Count}]");
+        }
+
+        private void CustomControlGetter(IMyTerminalBlock block, List<IMyTerminalControl> ownControls)
+        {
+            if (block.BlockDefinition.SubtypeId == ExampleModMain.MainBlockSubtypeId)
+            {
+                MyAPIGateway.Utilities.ShowMessage("", "Getter called");
+
+                foreach (var item in this.CustomControls)
+                {
+                    // ownControls.Add(item);
+                    ownControls.Insert(8 + CustomControls.IndexOf(item), item);
+                }
+
+            }
+        }
+
+        public sealed override void SaveData()
+        {
+            ExampleModMain.SaveData();
         }
 
         public override void UpdateBeforeSimulation()
@@ -62,50 +75,7 @@ namespace ExampleMod
             }
         }
 
-
-        public bool AlreadyHasControls(List<IMyTerminalControl> existingControls)
-        {
-            foreach (var control in existingControls)
-            {
-                if (control.Id == "ExampleToggleLabel")
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public void AddControlsToType<T>(List<IMyTerminalControl> controls)
-        {
-            var existingControls = new List<IMyTerminalControl>();
-            MyAPIGateway.TerminalControls.GetControls<T>(out existingControls);
-
-            if (AlreadyHasControls(existingControls)) return;
-
-            foreach (var control in controls)
-            {
-                MyAPIGateway.TerminalControls.AddControl<T>(control);
-            }
-
-        }
-
-        public void CreateControls()
-        {
-            var newControls = CreateControlList();
-
-            AddControlsToType<IMyTerminalBlock>(newControls);
-        }
-
-        public bool EnabledVisible(IMyTerminalBlock block)
-        {
-            return block.BlockDefinition.SubtypeId == "ExampleBlock";
-        }
-
-        public List<IMyTerminalControl> CreateControlList()
-        {
-
-            var controlList = new List<IMyTerminalControl>();
-
+        public void CreateControlList() {
             //Separator
             // var separator = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlSeparator, IMyTerminalBlock>("Renamer_Separator");
             // separator.Enabled = (Block) => Block.BlockDefinition.SubtypeId == "ExampleBlock";
@@ -113,75 +83,63 @@ namespace ExampleMod
             // separator.SupportsMultipleBlocks = true;
             // controlList.Add(separator);
 
+            CustomControls.Add(MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlSeparator, IMyTerminalBlock>("ExampleToggleSeparator"));
 
             // Label
             var label = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlLabel, IMyTerminalBlock>("ExampleToggleLabel");
-            label.Enabled = EnabledVisible;
-            label.Visible = EnabledVisible;
+            //label.Enabled = EnabledVisible;
+            //label.Visible = EnabledVisible;
             label.SupportsMultipleBlocks = true;
             label.Label = MyStringId.GetOrCompute("Example Label");
-            controlList.Add(label);
+            CustomControls.Add(label);
 
             // Toggle 1
             var toggle = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlOnOffSwitch, IMyTerminalBlock>("ExampleToggleRadio1");
-            toggle.Enabled = EnabledVisible;
-            toggle.Visible = EnabledVisible;
+            //toggle.Enabled = EnabledVisible;
+            //toggle.Visible = EnabledVisible;
             toggle.SupportsMultipleBlocks = false;
             toggle.OnText = MyStringId.GetOrCompute("HudInfoOn");
             toggle.OffText = MyStringId.GetOrCompute("HudInfoOff");
+            toggle.Title = MyStringId.GetOrCompute("Send messages from this block");
             toggle.Getter = (tBlock) => {
-                if (Configurations.ContainsKey(tBlock))
-                {
-                    return Configurations[tBlock].exampleToggle1;
-                }
-                return false;
+                var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
+                return ebl.exampleToggle1 || false;
             };
             toggle.Setter = (tBlock, value) =>
             {
-                if (Configurations.ContainsKey(tBlock) == false)
-                {
-                    var bc = new BlockConfig();
-                    bc.exampleToggle1 = value;
-                    Configurations.Add(tBlock, bc);
-                }
-                else
-                {
-                    Configurations[tBlock].exampleToggle1 = value;
-                }
+                var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
+                ebl.exampleToggle1 = value;
             };
-            controlList.Add(toggle);
+            CustomControls.Add(toggle);
 
             // Toggle 2
             var toggle2 = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlOnOffSwitch, IMyTerminalBlock>("ExampleToggleRadio2");
-            toggle2.Enabled = EnabledVisible;
-            toggle2.Visible = EnabledVisible;
+            //toggle2.Enabled = EnabledVisible;
+            //toggle2.Visible = EnabledVisible;
             toggle2.SupportsMultipleBlocks = false;
             toggle2.OnText = MyStringId.GetOrCompute("HudInfoOn");
             toggle2.OffText = MyStringId.GetOrCompute("HudInfoOff");
+            toggle2.Title = MyStringId.GetOrCompute("Send messages from this block");
             toggle2.Getter = (tBlock) => {
-                if (Configurations.ContainsKey(tBlock))
-                {
-                    return Configurations[tBlock].exampleToggle2;
-                }
-                return false;
+                var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
+                return ebl.exampleToggle2 || false;
             };
             toggle2.Setter = (tBlock, value) =>
             {
-                if (Configurations.ContainsKey(tBlock) == false)
-                {
-                    var bc = new BlockConfig();
-                    bc.exampleToggle2 = value;
-                    Configurations.Add(tBlock, bc);
-                }
-                else
-                {
-                    Configurations[tBlock].exampleToggle2 = value;
-                }
+                var ebl = tBlock.GameLogic.GetAs<ExampleBlockLogic>();
+                ebl.exampleToggle2 = value;
             };
-            controlList.Add(toggle2);
+            CustomControls.Add(toggle2);
 
-            return controlList;
-
+            var button = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlButton, IMyTerminalBlock>("ExampleButton");
+            button.Title = MyStringId.GetOrCompute("Save data");
+            button.Action = (block) =>
+            {
+                // var l = new List<ExampleBlockLogic>();
+                // l.Add(block.GameLogic.GetAs<ExampleBlockLogic>());
+                ExampleModMain.SaveData();
+            };
+            CustomControls.Add(button);
         }
     }
 }

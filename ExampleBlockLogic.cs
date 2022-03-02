@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Sandbox.Common;
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.Common.ObjectBuilders.Definitions;
@@ -27,17 +28,21 @@ using VRageMath;
 
 namespace ExampleMod
 {
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock),false, "ExampleBlock")]
-    public class ExampleBlockLogic: MyGameLogicComponent
+    [XmlType("ScanSettings")]
+    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock), false, ExampleModMain.MainBlockSubtypeId)]
+    public class ExampleBlockLogic : MyGameLogicComponent
     {
         public bool exampleToggle1 = false;
         public bool exampleToggle2 = false;
+        [XmlElement]
+        public long EntityId { get { return this.Entity.EntityId; } set { } }
 
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
             base.Init(objectBuilder);
             MyAPIGateway.Utilities.ShowMessage("help", "Mod initialized");
             NeedsUpdate = MyEntityUpdateEnum.EACH_100TH_FRAME;
+            ExampleModMain.AddBlock(this);
         }
 
         public override void UpdateBeforeSimulation100()

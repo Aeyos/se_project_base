@@ -5,4 +5,7 @@
     <StartProgram>A:\Users\Aeyos\AppData\Roaming\SpaceEngineers\Mods\ExampleMod\release.bat</StartProgram>
     <StartURL>google.com</StartURL>
   </PropertyGroup>
+  <PropertyGroup>
+    <ProjectView>ProjectFiles</ProjectView>
+  </PropertyGroup>
 </Project>
