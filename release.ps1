@@ -9,3 +9,5 @@ Copy-Item -Recurse SEModFiles "../$(Split-Path -Path $pwd -Leaf)_Release/"
 
 Remove-Item -Recurse "../$(Split-Path -Path $pwd -Leaf)_Release/Models/SourceModels"
 Remove-Item -Recurse "../$(Split-Path -Path $pwd -Leaf)_Release/Models/Utilities"
+
+explorer.exe steam://rungameid/244850

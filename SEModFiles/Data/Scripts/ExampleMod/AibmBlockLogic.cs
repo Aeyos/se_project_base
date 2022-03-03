@@ -31,6 +31,10 @@ namespace AIBM
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock), false, AibmModMain.MainBlockSubtypeId)]
     public class AibmBlockLogic : MyGameLogicComponent {
         public AibmBlockData blockData;
+        public AibmAlertMessages[] alertMessages;
+        public Color emissiveColor;
+        public IMyTerminalBlock myBlock;
+        private bool _init = false;
     
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
@@ -38,18 +42,30 @@ namespace AIBM
             base.Init(objectBuilder);
             NeedsUpdate = MyEntityUpdateEnum.EACH_100TH_FRAME;
             blockData = AibmModMain.CreateOrLoadConfig(this);
+            myBlock = Entity as IMyTerminalBlock;
+            _init = true;
         }
 
         public override void UpdateBeforeSimulation100()
         {
             base.UpdateBeforeSimulation100();
-            if (blockData.shouldAlertOnEnemyClose)
-            {
-                MyAPIGateway.Utilities.ShowMessage("AIBM", $"Enemy Inbound. Protect me!");
-            }
-            if (blockData.shouldAlertOnLowItems)
-            {
-                MyAPIGateway.Utilities.ShowMessage("AIBM", $"I'm running low on items");
+            if (_init == false) return;
+            UpdateEmissiveColor();
+        }
+
+        private void UpdateEmissiveColor()
+        {
+            Color newColor = emissiveColor;
+            // Broken
+            if (myBlock.IsFunctional == false) newColor = Color.Black;
+            // Off/No Power
+            else if (myBlock.IsWorking == false) newColor = Color.Red;
+            // Working normally
+            else if (emissiveColor != Color.Aquamarine) newColor = Color.Green;
+
+            if (newColor != emissiveColor) {
+                myBlock.SetEmissiveParts("Emissive", newColor, 1f);
+                emissiveColor = newColor;
             }
         }
     }

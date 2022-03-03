@@ -35,7 +35,7 @@
 			</ScreenAreas>
 			<BlockPairName>AIBMBlock</BlockPairName>
 			<EdgeType>Light</EdgeType>
-			<BuildTimeSeconds>20</BuildTimeSeconds>
+			<BuildTimeSeconds>30</BuildTimeSeconds>
 			<MountPoints>
 				<MountPoint Side="Back" StartX="0.00" StartY="0.00" EndX="1.00" EndY="1.00"/>
 				<MountPoint Side="Left" StartX="0.00" StartY="0.00" EndX="1.00" EndY="1.00"/>
@@ -49,6 +49,7 @@
 			<EmissiveColorPreset>Default</EmissiveColorPreset>
 			<DestroyEffect>BlockDestroyedExplosion_Large</DestroyEffect>
 			<DestroySound>WepSmallWarheadExpl</DestroySound>
+			<RequiredPowerInput>0.05</RequiredPowerInput>
 			<PCU>100</PCU>
 			<IsAirTight>false</IsAirTight>
 		</Definition>

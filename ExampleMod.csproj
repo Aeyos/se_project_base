@@ -2,8 +2,8 @@
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
-   <LangVersion>6</LangVersion>
-</PropertyGroup>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -118,13 +118,17 @@
     <None Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ExampleModLogic.cs">
+    <Compile Include="AibmModLogic.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExampleBlockLogic.cs" />
-    <Compile Include="ExampleModMain.cs" />
+    <Compile Include="AeyosUtils.cs" />
+    <Compile Include="AibmBlockLogic.cs" />
+    <Compile Include="AibmModMain.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AibmTypes.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

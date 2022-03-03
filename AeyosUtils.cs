@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using VRage.Game.ModAPI;
 using Sandbox.ModAPI;
+using VRageMath;
 
 namespace AIBM
 {
@@ -61,6 +62,17 @@ namespace AIBM
                 }
                 catch { }
             }
+        }
+    }
+
+    static class AeyosUtils
+    {
+
+        static private List<Color> colors = new List<Color> { Color.Red, Color.Blue, Color.Purple };
+        static private Random random = new Random();
+        static public Color RandomColor
+        {
+            get { return colors[random.Next(colors.Count - 1)]; }
         }
     }
 }

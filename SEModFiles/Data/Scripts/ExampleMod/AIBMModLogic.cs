@@ -8,6 +8,7 @@ using Sandbox.Common.ObjectBuilders;
 using Sandbox.Common.ObjectBuilders.Definitions;
 using Sandbox.Definitions;
 using Sandbox.Game;
+using Sandbox.Game.Components;
 using Sandbox.Game.Entities;
 using Sandbox.Game.EntityComponents;
 using Sandbox.Game.GameSystems;
@@ -132,6 +133,19 @@ namespace AIBM
                 ebl.blockData.enableContainerSorting = value;
             };
             CustomControls.Add(t2);
+
+            // Test - show blocks
+            var b1 = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlButton, IMyTerminalBlock>("AibmBlockButton_999");
+            b1.Title = MyStringId.GetOrCompute("Get names of blocks of this grid");
+            b1.Action = (cblock) => {
+                var blocks = cblock.CubeGrid.GetFatBlocks<IMyTerminalBlock>();
+                foreach (IMyTerminalBlock b in blocks)
+                {
+                    b.SetEmissiveParts("Emissive", AeyosUtils.RandomColor, 1);
+                    b.CustomData = $"AIBM:\n-storeIngots: true\n-storeOre: false\n-storeComponents: true\n/AIBM";
+                }
+            };
+            CustomControls.Add(b1);
         }
     }
 }
