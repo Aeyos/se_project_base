@@ -14,6 +14,7 @@ A Space Engineers mod that adds an AI block to help you manage your base.
 ## Planned Features
 
 - [X] Custom block for AI
+  - [ ] Alternative model with projection (transparent lcd, based on block_console)
 - [X] Custom Options for AI
   - [ ] Configuration Location (Title/Data)
   - [ ] Auto-sort containers (On/Off)
@@ -21,26 +22,37 @@ A Space Engineers mod that adds an AI block to help you manage your base.
   - [ ] Sort items alphabetically (On/Off)
   - [ ] Controlled assemblers (On/Off)
   - [ ] Auto-adjust solar panels (On/Off)
+  - [ ] Auto-close doors (On/Off)
   - [ ] Low item alerts (On/Off)
   - [ ] Low power alerts (On/Off)
   - [ ] Low storage alerts (On/Off)
   - [ ] Enemy proximity alerts (On/Off)
+  - [ ] Base damage alerts (On/Off)
   - [ ] Turn off Refineries on low Power (On/Off)
   - [ ] Turn off Assemblers on low Power (On/Off)
 - [ ] Quota for Ores/Ingots/Components/Items
-- [ ] Display quota, info, etc on LCD's
+- [ ] Display quota, info, power, O2, H etc on LCD's
   - [ ] Custom LCD script for eye-candy info
 - [ ] AI Customization
   - [ ] Name your AI for custom messages
-  - [ ] LCD that displays AI "emotions"
   - [ ] Custom AI faces
-- [ ] Auto-mine drill arm
+    - [X] Abot
+    - [ ] Butler
+    - [ ] Ram/Rem
+    - [ ] ZeroTwo
+    - [ ] EVA from WALL-E
+  - [ ] Custom AI Sound alerts (voiced AI)
+  - [ ] AI "emotions" (animated lcd using sprites and image change time)
+- [ ] Weldpad with LCD that displays components requirements
+- [ ] Auto-mine drill arm with auto-stop and auto-resume
 - [ ] Inter-grid funcionality (manage self/Manage self & docked)
+- [ ] Airlock functionality
+  - [ ] Auto depressurize, close and open doors
 
 ## Bugs
 
-* Block has no placeholder screen, screen only appears with content
-* Block has no category and only appears by searching in the G menu
+[X] Block has no placeholder screen, screen only appears with content
+[ ] Block has no category and only appears by searching in the G menu
 
 Helpful/Reference links:
 
