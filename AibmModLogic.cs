@@ -44,8 +44,6 @@ namespace AIBM
         {
             if (block.BlockDefinition.SubtypeId == AibmModMain.MainBlockSubtypeId)
             {
-                MyAPIGateway.Utilities.ShowMessage("", "Getter called");
-
                 foreach (var item in this.CustomControls)
                 {
                     // ownControls.Add(item);
@@ -98,6 +96,20 @@ namespace AIBM
             label.Label = MyStringId.GetOrCompute("AIBM Settings");
             CustomControls.Add(label);
 
+            // Name
+            var name = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlTextbox, IMyTerminalBlock>("AibmBlockText_2_1");
+            name.Title = MyStringId.GetOrCompute("AIBM Name");
+            name.Getter = (tBlock) => {
+                var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
+                return new StringBuilder(ebl.blockData.aiName);
+            };
+            name.Setter = (tBlock, value) =>
+            {
+                var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
+                ebl.blockData.aiName = value.ToString();
+            };
+            CustomControls.Add(name);
+
             // Toggle 1
             // Configuration Location (Title/Data) // useTitleForTargeting //
             var t1 = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlOnOffSwitch, IMyTerminalBlock>("AibmBlockToggle_3");
@@ -135,17 +147,7 @@ namespace AIBM
             CustomControls.Add(t2);
 
             // Test - show blocks
-            var b1 = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlButton, IMyTerminalBlock>("AibmBlockButton_999");
-            b1.Title = MyStringId.GetOrCompute("Get names of blocks of this grid");
-            b1.Action = (cblock) => {
-                var blocks = cblock.CubeGrid.GetFatBlocks<IMyTerminalBlock>();
-                foreach (IMyTerminalBlock b in blocks)
-                {
-                    b.SetEmissiveParts("Emissive", AeyosUtils.RandomColor, 1);
-                    b.CustomData = $"AIBM:\n-storeIngots: true\n-storeOre: false\n-storeComponents: true\n/AIBM";
-                }
-            };
-            CustomControls.Add(b1);
+            CustomControls.Add(AibmBlockLogic.CreateTestButton());
         }
     }
 }

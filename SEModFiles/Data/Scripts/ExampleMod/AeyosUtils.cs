@@ -72,7 +72,15 @@ namespace AIBM
         static private Random random = new Random();
         static public Color RandomColor
         {
-            get { return colors[random.Next(colors.Count - 1)]; }
+            get { return colors[random.Next(colors.Count)]; }
+        }
+    }
+
+    // Aeyos Grid Utils
+    static class AGU
+    {
+        public static List<T> getBlocksFromGrid<T>(IMyCubeGrid grid) where T : class, IMyCubeBlock {
+            return grid.GetFatBlocks<T>().ToList<T>();
         }
     }
 }

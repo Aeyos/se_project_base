@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using VRage.Game.ModAPI;
 using Sandbox.ModAPI;
 using VRageMath;
+using System.ComponentModel;
 
 namespace AIBM
 {
@@ -67,12 +68,46 @@ namespace AIBM
 
     static class AeyosUtils
     {
-
         static private List<Color> colors = new List<Color> { Color.Red, Color.Blue, Color.Purple };
         static private Random random = new Random();
         static public Color RandomColor
         {
-            get { return colors[random.Next(colors.Count - 1)]; }
+            get { return colors[random.Next(colors.Count)]; }
+        }
+
+        public static object Deserialize<T>(string data) where T : class
+        {
+            var containerData = Activator.CreateInstance(typeof(T));
+            var dataDictionary = data.Split('\n')
+                .Select(x => x.Split(':').Select(y => y.Trim()).ToArray())
+                .Where(x => x.Length > 1)
+                .ToDictionary(x => x[0].Substring(1, x[0].Length - 1), x => x[1]);
+
+            foreach (System.Reflection.FieldInfo f in typeof(AibmCargoContainerData).GetFields())
+            {
+                TypeConverter typeConverter = TypeDescriptor.GetConverter(f.FieldType);
+                object propValue = typeConverter.ConvertFromString(dataDictionary[f.Name]);
+                f.SetValue(containerData, propValue);
+            }
+            return containerData;
+        }
+
+        public static string Serialize(object o)
+        {
+            string ownProps = "";
+            foreach (System.Reflection.FieldInfo f in typeof(AibmCargoContainerData).GetFields())
+            {
+                ownProps += $"-{f.Name}: {f.GetValue(o).ToString()}\n";
+            }
+            return $"AIBM\n{ownProps}/AIBM";
+        }
+    }
+
+    // Aeyos Grid Utils
+    static class AGU
+    {
+        public static List<T> getBlocksFromGrid<T>(IMyCubeGrid grid) where T : class, IMyCubeBlock {
+            return grid.GetFatBlocks<T>().ToList<T>();
         }
     }
 }

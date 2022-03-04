@@ -68,5 +68,37 @@ namespace AIBM
                 emissiveColor = newColor;
             }
         }
+
+        internal static AibmBlockLogic ToLogic(IMyTerminalBlock block)
+        {
+            return block.GameLogic.GetAs<AibmBlockLogic>();
+        }
+
+        internal static IMyTerminalControl CreateTestButton()
+        {
+            var button = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlButton, IMyTerminalBlock>("AibmBlockLogic_TestButton");
+            button.Title = MyStringId.GetOrCompute("TEST!");
+            button.Action = (cblock) => {
+                //var blocks = cblock.CubeGrid.GetFatBlocks<IMyTerminalBlock>();
+                //foreach (IMyTerminalBlock b in blocks)
+                //{
+                //    b.SetEmissiveParts("Emissive", AeyosUtils.RandomColor, 1);
+                //    b.CustomData = $"AIBM:\n-storeIngots: true\n-storeOre: false\n-storeComponents: true\n/AIBM";
+                //    MySoundPair mySoundPair = new MySoundPair("ArcPoofExplosionCat1");
+                //    MyAPIGateway.Session.Player.Character.GameLogic.Container.Get<MyCharacterSoundComponent>().PlayActionSound(mySoundPair);
+                //    foreach (Type t in MyAPIGateway.Session.Player.Character.GameLogic.Container.GetComponentTypes().ToList())
+                //    {
+                //        MyAPIGateway.Utilities.ShowMessage("", t.FullName);
+                //    }
+                //}
+                var bLogic = AibmBlockLogic.ToLogic(cblock);
+                var cargoContainers = AGU.getBlocksFromGrid<IMyCargoContainer>(cblock.CubeGrid);
+                foreach (var cargo in cargoContainers)
+                {
+                    cargo.CustomName = $">{bLogic.blockData.aiName}< was here";
+                }
+            };
+            return button;
+        }
     }
 }

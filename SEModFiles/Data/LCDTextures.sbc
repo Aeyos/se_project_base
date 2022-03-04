@@ -4,11 +4,29 @@
         <LCDTextureDefinition>
             <Id>
                 <TypeId>LCDTextureDefinition</TypeId>
-                <SubtypeId>Abot</SubtypeId>
+                <SubtypeId>Aibm_Abot</SubtypeId>
             </Id>
-            <LocalizationId>Abot</LocalizationId>
+            <LocalizationId>Aibm_Abot</LocalizationId>
             <!-- <TexturePath>Textures\Models\default_offline.dds</TexturePath> -->
             <SpritePath>Textures\Sprites\abot.dds</SpritePath>
+        </LCDTextureDefinition>
+        <LCDTextureDefinition>
+            <Id>
+                <TypeId>LCDTextureDefinition</TypeId>
+                <SubtypeId>Aibm_Abot2</SubtypeId>
+            </Id>
+            <LocalizationId>Aibm_Abot2</LocalizationId>
+            <!-- <TexturePath>Textures\Models\default_offline.dds</TexturePath> -->
+            <SpritePath>Textures\Sprites\abot2.dds</SpritePath>
+        </LCDTextureDefinition>
+        <LCDTextureDefinition>
+            <Id>
+                <TypeId>LCDTextureDefinition</TypeId>
+                <SubtypeId>Aibm_wAIfu</SubtypeId>
+            </Id>
+            <LocalizationId>Aibm_wAIfu</LocalizationId>
+            <!-- <TexturePath>Textures\Models\default_offline.dds</TexturePath> -->
+            <SpritePath>Textures\Sprites\wAIfu.dds</SpritePath>
         </LCDTextureDefinition>
     </LCDTextures>
 </Definitions>

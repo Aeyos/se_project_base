@@ -37,10 +37,11 @@ A Space Engineers mod that adds an AI block to help you manage your base.
   - [ ] Name your AI for custom messages
   - [ ] Custom AI faces
     - [X] Abot
-    - [ ] Butler
-    - [ ] Ram/Rem
-    - [ ] ZeroTwo
-    - [ ] EVA from WALL-E
+    - [ ] wAIfu
+    - [ ] Ram/Rem (possibly addon/second mod)
+    - [ ] ZeroTwo (possibly addon/second mod)
+    - [ ] EVA from WALL-E (possibly addon/second mod)
+    - [ ] Butler (possibly addon/second mod)
   - [ ] Custom AI Sound alerts (voiced AI)
   - [ ] AI "emotions" (animated lcd using sprites and image change time)
 - [ ] Weldpad with LCD that displays components requirements

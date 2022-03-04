@@ -2,6 +2,7 @@ using Sandbox.ModAPI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml.Serialization;
 using VRage.Game.ModAPI.Ingame;
 
@@ -36,6 +37,8 @@ namespace AIBM
         public bool disableAssemblersOnLowPower = false;
         // Entity Id for saving/loading options
         public long entityId;
+        // Name of the ai
+        public string aiName = "ABot";
     }
 
     public static class AibmModMain
