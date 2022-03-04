@@ -92,7 +92,7 @@ namespace AIBM
                 //    }
                 //}
                 var bLogic = AibmBlockLogic.ToLogic(cblock);
-                var cargoContainers = AGU.getBlocksFromGrid<IMyCargoContainer>(cblock.CubeGrid);
+                var cargoContainers = AeyosUtils.getBlocksFromGrid<IMyCargoContainer>(cblock.CubeGrid);
                 foreach (var cargo in cargoContainers)
                 {
                     cargo.CustomName = $">{bLogic.blockData.aiName}< was here";

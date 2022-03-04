@@ -49,6 +49,9 @@ A Space Engineers mod that adds an AI block to help you manage your base.
 - [ ] Inter-grid funcionality (manage self/Manage self & docked)
 - [ ] Airlock functionality
   - [ ] Auto depressurize, close and open doors
+- [ ] Translation
+  - [ ] ES
+  - [ ] PT
 
 ## Bugs
 

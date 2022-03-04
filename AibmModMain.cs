@@ -8,39 +8,6 @@ using VRage.Game.ModAPI.Ingame;
 
 namespace AIBM
 {
-    [XmlType("AIBMBlockSettings")]
-    public class AibmBlockData
-    {
-        // Configuration Location (Title/Data)
-        public bool useTitleForTargeting = false;
-        // Auto-sort containers (On/Off)
-        public bool enableContainerSorting = false;
-        // Auto-assign containers (On/Off)
-        public bool enableAutoAssignContainers = false;
-        // Sort items alphabetically (On/Off)
-        public bool enableSortItemsByName = true;
-        // Controlled assemblers (On/Off)
-        public bool enableControlAssemblers = false;
-        // Auto-adjust solar panels (On/Off)
-        public bool enableSolarPanelControl = false;
-        // Low item alerts (On/Off)
-        public bool shouldAlertOnLowItems = true;
-        // Low power alerts (On/Off)
-        public bool shouldAlertOnLowPower = true;
-        // Low storage alerts (On/Off)
-        public bool shouldAlertOnLowStorage = true;
-        // Enemy proximity alerts (On/Off)
-        public bool shouldAlertOnEnemyClose = true;
-        // Turn off Refineries on low Power (On/Off)
-        public bool disableRefineriesOnLowPower = false;
-        // Turn off Assemblers on low Power (On/Off)
-        public bool disableAssemblersOnLowPower = false;
-        // Entity Id for saving/loading options
-        public long entityId;
-        // Name of the ai
-        public string aiName = "ABot";
-    }
-
     public static class AibmModMain
     {
         public const string version =  "0.0.1";

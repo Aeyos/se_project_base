@@ -8,6 +8,8 @@ using VRage.Game.ModAPI;
 using Sandbox.ModAPI;
 using VRageMath;
 using System.ComponentModel;
+using Sandbox.ModAPI.Interfaces.Terminal;
+using VRage.Utils;
 
 namespace AIBM
 {
@@ -101,13 +103,42 @@ namespace AIBM
             }
             return $"AIBM\n{ownProps}/AIBM";
         }
-    }
 
-    // Aeyos Grid Utils
-    static class AGU
-    {
-        public static List<T> getBlocksFromGrid<T>(IMyCubeGrid grid) where T : class, IMyCubeBlock {
+        public static List<T> getBlocksFromGrid<T>(IMyCubeGrid grid) where T : class, IMyCubeBlock
+        {
             return grid.GetFatBlocks<T>().ToList<T>();
         }
+
+        public static T CreateControl<T>(string name)
+        {
+            return MyAPIGateway.TerminalControls.CreateControl<T, IMyTerminalBlock>(name);
+        }
+
+        public static T CreateControl<T>(string name, string title, string tooltip = null) where T : IMyTerminalControlTitleTooltip
+        {
+            var control = MyAPIGateway.TerminalControls.CreateControl<T, IMyTerminalBlock>(name);
+            control.Title = MyStringId.GetOrCompute(title);
+            if (tooltip != null)
+            {
+                control.Tooltip = MyStringId.GetOrCompute(tooltip);
+            }
+            return control;
+        }
+
+        public static IMyTerminalControlLabel CreateControl(string name, string label)
+        {
+            var control = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlLabel, IMyTerminalBlock>(name);
+            control.Label = MyStringId.GetOrCompute(label);
+            return control;
+        }
+
+        //public static IMyTerminalControlTextbox CreateControl(string name, string label, Func<IMyTerminalBlock, StringBuilder> fget, Action<IMyTerminalBlock, StringBuilder> fset)
+        //{
+        //    IMyTerminalControlTextbox control = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlTextbox, IMyTerminalBlock>(name);
+        //    control.Title = MyStringId.GetOrCompute(label);
+        //    control.Getter = fget;
+        //    control.Setter = fset;
+        //    return control;
+        //}
     }
 }
