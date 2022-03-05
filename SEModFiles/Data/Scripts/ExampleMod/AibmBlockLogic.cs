@@ -28,6 +28,16 @@ using VRageMath;
 
 namespace AIBM
 {
+    enum ContainerCargoType : byte
+    {
+        Ores = 1,
+        Ingots = 2,
+        Components = 4,
+        Ammo = 8,
+        Items = 16,
+        Bottles = 32,
+    }
+
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock), false, AibmModMain.MainBlockSubtypeId)]
     public class AibmBlockLogic : MyGameLogicComponent {
         public AibmBlockData blockData;
@@ -35,7 +45,14 @@ namespace AIBM
         public Color emissiveColor;
         public IMyTerminalBlock myBlock;
         private bool _init = false;
+        private readonly Dictionary<IMyCargoContainer, bool> d_managedContainers = new Dictionary<IMyCargoContainer,bool>();
+        private readonly Dictionary<ContainerCargoType, IMyCargoContainer> d_containers= new Dictionary<ContainerCargoType, IMyCargoContainer>();
     
+        internal static AibmBlockLogic ToLogic(IMyTerminalBlock block)
+        {
+            return block.GameLogic.GetAs<AibmBlockLogic>();
+        }
+
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
             AeyosLogger.Log($"AIBMBlockLogic:Init {this.Entity.EntityId}");
@@ -51,6 +68,7 @@ namespace AIBM
             base.UpdateBeforeSimulation100();
             if (_init == false) return;
             UpdateEmissiveColor();
+            UpdateAutoSort();
         }
 
         private void UpdateEmissiveColor()
@@ -69,9 +87,14 @@ namespace AIBM
             }
         }
 
-        internal static AibmBlockLogic ToLogic(IMyTerminalBlock block)
+        private void UpdateAutoSort()
         {
-            return block.GameLogic.GetAs<AibmBlockLogic>();
+            // CHECK IF MORE CONTAINERS ARE NEEDED (fill level for certain type == 100%
+            // --GET ALL CONTAINERS
+            // --PICK BIGGEST UNASSIGNED CONTAINER
+            // --MANAGE IT
+            // SORT MANAGED CONTAINERS
+            // TODO: Sort UN-MANGED containers (? - add option)
         }
 
         internal static IMyTerminalControl CreateTestButton()
@@ -79,6 +102,7 @@ namespace AIBM
             var button = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlButton, IMyTerminalBlock>("AibmBlockLogic_TestButton");
             button.Title = MyStringId.GetOrCompute("TEST!");
             button.Action = (cblock) => {
+                // RANOMIZE EMISSIVE PARTS // PLAY SOUND FOR USER ONLY // GET PLAYER COMPONENTS //
                 //var blocks = cblock.CubeGrid.GetFatBlocks<IMyTerminalBlock>();
                 //foreach (IMyTerminalBlock b in blocks)
                 //{
@@ -91,11 +115,14 @@ namespace AIBM
                 //        MyAPIGateway.Utilities.ShowMessage("", t.FullName);
                 //    }
                 //}
+
                 var bLogic = AibmBlockLogic.ToLogic(cblock);
-                var cargoContainers = AGU.getBlocksFromGrid<IMyCargoContainer>(cblock.CubeGrid);
+                var cargoContainers = AeyosUtils.getBlocksFromGrid<IMyCargoContainer>(cblock.CubeGrid);
+                cargoContainers.Sort((a,b) => ((double)b.GetInventory().MaxVolume).CompareTo((double) a.GetInventory().MaxVolume));
                 foreach (var cargo in cargoContainers)
                 {
-                    cargo.CustomName = $">{bLogic.blockData.aiName}< was here";
+                    var cargoInv = cargo.GetInventory();
+                    
                 }
             };
             return button;

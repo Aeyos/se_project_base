@@ -16,7 +16,7 @@ A Space Engineers mod that adds an AI block to help you manage your base.
 - [X] Custom block for AI
   - [ ] Alternative model with projection (transparent lcd, based on block_console)
 - [X] Custom Options for AI
-  - [ ] Configuration Location (Title/Data)
+  - [X] Configuration Location (Title/Data)
   - [ ] Auto-sort containers (On/Off)
   - [ ] Auto-assign containers (On/Off)
   - [ ] Sort items alphabetically (On/Off)
@@ -33,6 +33,7 @@ A Space Engineers mod that adds an AI block to help you manage your base.
 - [ ] Quota for Ores/Ingots/Components/Items
 - [ ] Display quota, info, power, O2, H etc on LCD's
   - [ ] Custom LCD script for eye-candy info
+- [ ] Benchmark, debug info, CPU time, optimizations
 - [ ] AI Customization
   - [ ] Name your AI for custom messages
   - [ ] Custom AI faces

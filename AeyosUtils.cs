@@ -10,6 +10,8 @@ using VRageMath;
 using System.ComponentModel;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using VRage.Utils;
+using Sandbox.Game.Gui;
+using Sandbox.Game;
 
 namespace AIBM
 {
@@ -66,6 +68,25 @@ namespace AIBM
                 catch { }
             }
         }
+
+        static public void MessageAll(string message)
+        {
+            MyAPIGateway.Utilities.ShowMessage("AeyosLog", message);
+        }
+
+        static public void MessageMe(string message, string author = null)
+        {
+            MessageMe(message, author: author, color: Color.White);
+        }
+
+        static public void MessageMe(string message, Color color, string author = null)
+        {
+            if (author == null) {
+                author = message;
+                message = "";
+            }
+            MyVisualScriptLogicProvider.SendChatMessageColored(message, color, author: author);
+        }
     }
 
     static class AeyosUtils
@@ -77,32 +98,32 @@ namespace AIBM
             get { return colors[random.Next(colors.Count)]; }
         }
 
-        public static object Deserialize<T>(string data) where T : class
-        {
-            var containerData = Activator.CreateInstance(typeof(T));
-            var dataDictionary = data.Split('\n')
-                .Select(x => x.Split(':').Select(y => y.Trim()).ToArray())
-                .Where(x => x.Length > 1)
-                .ToDictionary(x => x[0].Substring(1, x[0].Length - 1), x => x[1]);
+        //public static object Deserialize<T>(string data) where T : class
+        //{
+        //    var containerData = Activator.CreateInstance(typeof(T));
+        //    var dataDictionary = data.Split('\n')
+        //        .Select(x => x.Split(':').Select(y => y.Trim()).ToArray())
+        //        .Where(x => x.Length > 1)
+        //        .ToDictionary(x => x[0].Substring(1, x[0].Length - 1), x => x[1]);
 
-            foreach (System.Reflection.FieldInfo f in typeof(AibmCargoContainerData).GetFields())
-            {
-                TypeConverter typeConverter = TypeDescriptor.GetConverter(f.FieldType);
-                object propValue = typeConverter.ConvertFromString(dataDictionary[f.Name]);
-                f.SetValue(containerData, propValue);
-            }
-            return containerData;
-        }
+        //    foreach (System.Reflection.FieldInfo f in typeof(AibmCargoContainerData).GetFields())
+        //    {
+        //        TypeConverter typeConverter = TypeDescriptor.GetConverter(f.FieldType);
+        //        object propValue = typeConverter.ConvertFromString(dataDictionary[f.Name]);
+        //        f.SetValue(containerData, propValue);
+        //    }
+        //    return containerData;
+        //}
 
-        public static string Serialize(object o)
-        {
-            string ownProps = "";
-            foreach (System.Reflection.FieldInfo f in typeof(AibmCargoContainerData).GetFields())
-            {
-                ownProps += $"-{f.Name}: {f.GetValue(o).ToString()}\n";
-            }
-            return $"AIBM\n{ownProps}/AIBM";
-        }
+        //public static string Serialize(object o)
+        //{
+        //    string ownProps = "";
+        //    foreach (System.Reflection.FieldInfo f in typeof(AibmCargoContainerData).GetFields())
+        //    {
+        //        ownProps += $"-{f.Name}: {f.GetValue(o).ToString()}\n";
+        //    }
+        //    return $"AIBM\n{ownProps}/AIBM";
+        //}
 
         public static List<T> getBlocksFromGrid<T>(IMyCubeGrid grid) where T : class, IMyCubeBlock
         {

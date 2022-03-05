@@ -12,24 +12,52 @@ using VRage.Utils;
 
 namespace AIBM
 {
-	public enum AibmAlertMessageType
+    public enum AibmAlertMessageType
     {
-		Enemy,
-		LowOnItems,
+        Enemy,
+        LowOnItems,
     }
 
-	public class AibmAlertMessages
-	{
-		public AibmAlertMessageType type;
-		public string message;
-		public long targetId;
-	}
-
-	public class AibmCargoContainerData
+    public class AibmAlertMessages
     {
-		public bool storeOre = false;
-		public bool storeIngot = false;
-		public bool storeComponent = false;
+        public AibmAlertMessageType type;
+        public string message;
+        public long targetId;
+    }
+
+    public class AibmCargoContainerData
+    {
+        public bool storeOre = false;
+        public bool storeIngot = false;
+        public bool storeComponent = false;
+
+        public string Serialize()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("AIBM");
+            sb.AppendLine($"-storeOre: {storeOre.ToString()}");
+            sb.AppendLine($"-storeIngot: {storeIngot.ToString()}");
+            sb.AppendLine($"-storeComponent: {storeComponent.ToString()}");
+            sb.AppendLine("/AIBM");
+            return sb.ToString();
+        }
+
+        public static AibmCargoContainerData Deserialize(string data)
+        {
+            var cargoContainer = new AibmCargoContainerData();
+            var dictionary = data.Split('\n')
+                .Select(x => x.Split(':').Select(y => y.Trim()).ToArray())
+                .Where(x => x.Length > 1)
+                .ToDictionary(x => x[0].Substring(1, x[0].Length - 1), x => x[1]);
+            foreach (KeyValuePair<string, string> d in dictionary)
+            {
+                if (d.Key == "storeOre") cargoContainer.storeOre = Boolean.Parse(d.Value);
+                if (d.Key == "storeIngot") cargoContainer.storeIngot = Boolean.Parse(d.Value);
+                if (d.Key == "storeComponent") cargoContainer.storeComponent = Boolean.Parse(d.Value);
+            }
+
+            return cargoContainer;
+        }
     }
 
     [XmlType("AIBMBlockSettings")]
@@ -104,6 +132,7 @@ namespace AIBM
             var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
             ebl.blockData.aiName = value.ToString();
         }
+
         static public StringBuilder GetAiName(IMyTerminalBlock tBlock)
         {
             var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
@@ -139,6 +168,32 @@ namespace AIBM
         {
             var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
             ebl.blockData.enableContainerSorting = value;
+        }
+    }
+
+    public enum ContainerCargoType : byte
+    {
+        Ores = 1,
+        Ingots = 2,
+        Components = 4,
+        Ammo = 8,
+        Items = 16,
+        Bottles = 32,
+    }
+
+    public class ContainerCollection {
+        public List<IMyCargoContainer> cargoContainers = new List<IMyCargoContainer>();
+
+        public double FillRate
+        {
+            get
+            {
+                return cargoContainers.Select(x =>
+                {
+                    var inv = x.GetInventory();
+                    return ((double)inv.CurrentVolume) / ((double)inv.MaxVolume);
+                }).Sum();
+            }
         }
     }
 }

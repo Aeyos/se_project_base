@@ -36,6 +36,7 @@ namespace AIBM
         public void Init()
         {
             AeyosLogger.Log("AIBMModLogic:Init Adding controls");
+            // TODO: Separate controls by block SubTypeId
             AibmBlockData.CreateControlList(CustomControls);
             MyAPIGateway.TerminalControls.CustomControlGetter += CustomControlGetter;
         }

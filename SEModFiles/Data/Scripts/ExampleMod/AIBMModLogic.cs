@@ -36,7 +36,8 @@ namespace AIBM
         public void Init()
         {
             AeyosLogger.Log("AIBMModLogic:Init Adding controls");
-            CreateControlList();
+            // TODO: Separate controls by block SubTypeId
+            AibmBlockData.CreateControlList(CustomControls);
             MyAPIGateway.TerminalControls.CustomControlGetter += CustomControlGetter;
         }
 
@@ -49,7 +50,6 @@ namespace AIBM
                     // ownControls.Add(item);
                     ownControls.Insert(8 + CustomControls.IndexOf(item), item);
                 }
-
             }
         }
 
@@ -83,71 +83,8 @@ namespace AIBM
             }
             catch (Exception e)
             {
-                // Mod.Log.Error(e);
+                AeyosLogger.Error("UpdateBeforeSimulation", e);
             }
-        }
-
-        public void CreateControlList() {
-            // Add separator
-            CustomControls.Add(MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlSeparator, IMyTerminalBlock>("AibmBlockSeparator_1"));
-
-            // Label
-            var label = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlLabel, IMyTerminalBlock>("AibmBlockTitle_2");
-            label.Label = MyStringId.GetOrCompute("AIBM Settings");
-            CustomControls.Add(label);
-
-            // Name
-            var name = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlTextbox, IMyTerminalBlock>("AibmBlockText_2_1");
-            name.Title = MyStringId.GetOrCompute("AIBM Name");
-            name.Getter = (tBlock) => {
-                var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
-                return new StringBuilder(ebl.blockData.aiName);
-            };
-            name.Setter = (tBlock, value) =>
-            {
-                var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
-                ebl.blockData.aiName = value.ToString();
-            };
-            CustomControls.Add(name);
-
-            // Toggle 1
-            // Configuration Location (Title/Data) // useTitleForTargeting //
-            var t1 = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlOnOffSwitch, IMyTerminalBlock>("AibmBlockToggle_3");
-            t1.Title = MyStringId.GetOrCompute("Block Targeting");
-            t1.Tooltip = MyStringId.GetOrCompute("Where should AIBM look for tags, either in the Title, or in the Custom Data, of containers, assemblers, refineries, etc.");
-            t1.OnText = MyStringId.GetOrCompute("Title");
-            t1.OffText = MyStringId.GetOrCompute("Custom Data");
-            t1.Getter = (tBlock) => {
-                var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
-                return ebl.blockData.useTitleForTargeting;
-            };
-            t1.Setter = (tBlock, value) =>
-            {
-                var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
-                ebl.blockData.useTitleForTargeting = value;
-            };
-            CustomControls.Add(t1);
-
-            // Toggle 2
-            // Auto-sort containers (On/Off) // enableContainerSorting
-            var t2 = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlOnOffSwitch, IMyTerminalBlock>("AibmBlockToggle_4");
-            t2.Title = MyStringId.GetOrCompute("Auto-sort containers");
-            t2.Tooltip = MyStringId.GetOrCompute("Enable/Disable AIBM to sort items in your grid");
-            t2.OnText = MyStringId.GetOrCompute("HudInfoOn");
-            t2.OffText = MyStringId.GetOrCompute("HudInfoOff");
-            t2.Getter = (tBlock) => {
-                var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
-                return ebl.blockData.enableContainerSorting;
-            };
-            t2.Setter = (tBlock, value) =>
-            {
-                var ebl = tBlock.GameLogic.GetAs<AibmBlockLogic>();
-                ebl.blockData.enableContainerSorting = value;
-            };
-            CustomControls.Add(t2);
-
-            // Test - show blocks
-            CustomControls.Add(AibmBlockLogic.CreateTestButton());
         }
     }
 }

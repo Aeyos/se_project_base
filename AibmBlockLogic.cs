@@ -28,6 +28,8 @@ using VRageMath;
 
 namespace AIBM
 {
+
+
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock), false, AibmModMain.MainBlockSubtypeId)]
     public class AibmBlockLogic : MyGameLogicComponent {
         public AibmBlockData blockData;
@@ -35,7 +37,15 @@ namespace AIBM
         public Color emissiveColor;
         public IMyTerminalBlock myBlock;
         private bool _init = false;
+        private readonly Dictionary<IMyCargoContainer, bool> d_managedContainers = new Dictionary<IMyCargoContainer,bool>();
+        private readonly Dictionary<ContainerCargoType, ContainerCollection> d_containers = new Dictionary<ContainerCargoType, ContainerCollection>();
+        private List<IMyCargoContainer> _tempCargoContainerList;
     
+        internal static AibmBlockLogic ToLogic(IMyTerminalBlock block)
+        {
+            return block.GameLogic.GetAs<AibmBlockLogic>();
+        }
+
         public override void Init(MyObjectBuilder_EntityBase objectBuilder)
         {
             AeyosLogger.Log($"AIBMBlockLogic:Init {this.Entity.EntityId}");
@@ -46,11 +56,35 @@ namespace AIBM
             _init = true;
         }
 
+        IMyCargoContainer GetUnassignedContainer()
+        {
+            // IF LIST IS NULL, POPULATE IT
+            if (_tempCargoContainerList == null)
+            {
+                // GET ALL UNASSIGNED CONTAINERS
+                _tempCargoContainerList = AeyosUtils.getBlocksFromGrid<IMyCargoContainer>(myBlock.CubeGrid).FindAll(x => d_managedContainers.ContainsKey(x) == false);
+                // SORT BY CAPACITY
+                _tempCargoContainerList.Sort((a, b) => b.GetInventory().MaxVolume.RawValue.CompareTo(a.GetInventory().MaxVolume.RawValue));
+            }
+
+            // GET FIRST CONTAINER IF THEY ARE NOT TAKEN
+            if (_tempCargoContainerList.Count > 0)
+            {
+                var cargo = _tempCargoContainerList.ElementAt(0);
+                _tempCargoContainerList.Remove(cargo);
+                return cargo;
+            }
+
+            // NO CONTAINERS FOUND
+            return null;
+        }
+
         public override void UpdateBeforeSimulation100()
         {
             base.UpdateBeforeSimulation100();
             if (_init == false) return;
             UpdateEmissiveColor();
+            UpdateAutoSort();
         }
 
         private void UpdateEmissiveColor()
@@ -69,9 +103,41 @@ namespace AIBM
             }
         }
 
-        internal static AibmBlockLogic ToLogic(IMyTerminalBlock block)
+        private void UpdateAutoSort()
         {
-            return block.GameLogic.GetAs<AibmBlockLogic>();
+            // DON'T sort containers, return
+            if (blockData.enableContainerSorting == false) return;
+
+            // Refresh cargo containers
+            _tempCargoContainerList = null;
+
+            // For all types of containers
+            foreach (ContainerCargoType containerType in Enum.GetValues(typeof(ContainerCargoType)))
+            {
+                // There are no containers for ORE or FILL RATE >= 99%
+                if (d_containers.ContainsKey(containerType) == false || d_containers[containerType].FillRate >= 0.99)
+                {
+                    // Get free container
+                    var cargo = GetUnassignedContainer();
+                    
+                    // Assign container if it exists
+                    if (cargo != null)
+                    {
+                        d_containers[containerType] = new ContainerCollection { cargoContainers = new List<IMyCargoContainer> { GetUnassignedContainer() } };
+                    }
+                    else
+                    {
+                        // TODO: alert user for lack of avaialable containers
+                        // Enum.GetName(typeof(ContainerCargoType), containerType).ToString();
+                        var enumName = Enum.GetName(typeof(ContainerCargoType), containerType).ToString();
+                        AeyosLogger.MessageAll($"I need a container for {enumName}");
+                    }
+                }
+            }
+
+            // --MANAGE IT
+            // SORT MANAGED CONTAINERS
+            // TODO: Sort UN-MANGED containers (? - add option)
         }
 
         internal static IMyTerminalControl CreateTestButton()
@@ -79,6 +145,7 @@ namespace AIBM
             var button = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlButton, IMyTerminalBlock>("AibmBlockLogic_TestButton");
             button.Title = MyStringId.GetOrCompute("TEST!");
             button.Action = (cblock) => {
+                // RANOMIZE EMISSIVE PARTS // PLAY SOUND FOR USER ONLY // GET PLAYER COMPONENTS //
                 //var blocks = cblock.CubeGrid.GetFatBlocks<IMyTerminalBlock>();
                 //foreach (IMyTerminalBlock b in blocks)
                 //{
@@ -91,11 +158,14 @@ namespace AIBM
                 //        MyAPIGateway.Utilities.ShowMessage("", t.FullName);
                 //    }
                 //}
+
                 var bLogic = AibmBlockLogic.ToLogic(cblock);
                 var cargoContainers = AeyosUtils.getBlocksFromGrid<IMyCargoContainer>(cblock.CubeGrid);
+                cargoContainers.Sort((a,b) => ((double)b.GetInventory().MaxVolume).CompareTo((double) a.GetInventory().MaxVolume));
                 foreach (var cargo in cargoContainers)
                 {
-                    cargo.CustomName = $">{bLogic.blockData.aiName}< was here";
+                    var cargoInv = cargo.GetInventory();
+                    
                 }
             };
             return button;
