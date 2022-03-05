@@ -38,9 +38,10 @@ namespace AIBM
         public IMyTerminalBlock myBlock;
         private bool _init = false;
         private readonly Dictionary<IMyCargoContainer, bool> d_managedContainers = new Dictionary<IMyCargoContainer,bool>();
-        private readonly Dictionary<ContainerCargoType, ContainerCollection> d_containers = new Dictionary<ContainerCargoType, ContainerCollection>();
+        private AibmCargoContainerCollection d_containers = new AibmCargoContainerCollection();
         private List<IMyCargoContainer> _tempCargoContainerList;
-    
+        private List<IMyCargoContainer> _tempMetaCargoContainerList;
+
         internal static AibmBlockLogic ToLogic(IMyTerminalBlock block)
         {
             return block.GameLogic.GetAs<AibmBlockLogic>();
@@ -55,18 +56,90 @@ namespace AIBM
             myBlock = Entity as IMyTerminalBlock;
             _init = true;
         }
+        
+        public override void UpdateBeforeSimulation100()
+        {
+            base.UpdateBeforeSimulation100();
+            if (_init == false) return;
+            UpdateEmissiveColor();
+            UpdateAutoSort();
+        }
+        
+        private void UpdateEmissiveColor()
+        {
+            Color newColor = emissiveColor;
+            // Broken
+            if (myBlock.IsFunctional == false) newColor = Color.Black;
+            // Off/No Power
+            else if (myBlock.IsWorking == false) newColor = Color.Red;
+            // Working normally
+            else if (emissiveColor != Color.Aquamarine) newColor = Color.Green;
+
+            if (newColor != emissiveColor)
+            {
+                myBlock.SetEmissiveParts("Emissive", newColor, 1f);
+                emissiveColor = newColor;
+            }
+        }
+
+        private void UpdateAutoSort()
+        {
+            // DON'T auto-sort containers, return
+            if (blockData.enableContainerSorting == false) return;
+
+            // Refresh cargo containers
+            RefreshCargoContainerLists();
+
+            // CHECK ALL UNMANAGED
+            // For all unmanaged cargos that have customData
+            foreach (IMyCargoContainer cargo in _tempMetaCargoContainerList)
+            {
+                // Manage them
+                d_containers.Add(cargo);
+            }
+
+            // CHECK FILL RATES FOR MANAGED CONTAINERS
+            // For all types of containers
+            foreach (AibmCargoContainerType cargoContainerType in Enum.GetValues(typeof(AibmCargoContainerType)))
+            {
+                var enumName = Enum.GetName(typeof(AibmCargoContainerType), cargoContainerType).ToString();
+
+                // There are no containers for TYPE or FILL RATE >= 95%
+                if (d_containers.GetFillRate(cargoContainerType) >= 0.95)
+                {
+                    // Get free container
+                    var cargo = GetUnassignedContainer();
+
+                    // Assign container if it exists
+                    if (cargo != null)
+                    {
+                        d_containers.Add(cargo, cargoContainerType);
+                    }
+                    else
+                    {
+                        // TODO: alert user for lack of avaialable containers
+                        // Enum.GetName(typeof(AibmCargoContainerType), containerType).ToString();
+                        // AeyosLogger.MessageAll($"I need a container for {enumName}");
+                    }
+                }
+
+                //if (d_containers.ContainsKey(containerType) == true)
+                //{
+                //    foreach (var container in d_containers[containerType].cargoContainers)
+                //    {
+                //        container.CustomName = $"Container for: {enumName}";
+                //        container.
+                //    }
+                //}
+            }
+
+            // DISCOVER UNCONTROLLED CARGOS WITH METADATA
+            // SORT MANAGED CONTAINERS
+            // TODO: Sort UN-MANGED containers (? - add option)
+        }
 
         IMyCargoContainer GetUnassignedContainer()
         {
-            // IF LIST IS NULL, POPULATE IT
-            if (_tempCargoContainerList == null)
-            {
-                // GET ALL UNASSIGNED CONTAINERS
-                _tempCargoContainerList = AeyosUtils.getBlocksFromGrid<IMyCargoContainer>(myBlock.CubeGrid).FindAll(x => d_managedContainers.ContainsKey(x) == false);
-                // SORT BY CAPACITY
-                _tempCargoContainerList.Sort((a, b) => b.GetInventory().MaxVolume.RawValue.CompareTo(a.GetInventory().MaxVolume.RawValue));
-            }
-
             // GET FIRST CONTAINER IF THEY ARE NOT TAKEN
             if (_tempCargoContainerList.Count > 0)
             {
@@ -79,65 +152,47 @@ namespace AIBM
             return null;
         }
 
-        public override void UpdateBeforeSimulation100()
+        void RefreshCargoContainerLists()
         {
-            base.UpdateBeforeSimulation100();
-            if (_init == false) return;
-            UpdateEmissiveColor();
-            UpdateAutoSort();
-        }
+            // CREATE LISTS // OVERRIDE LIST FROM LAST UPDATE //
+            _tempCargoContainerList = new List<IMyCargoContainer>();
+            _tempMetaCargoContainerList = new List<IMyCargoContainer>();
 
-        private void UpdateEmissiveColor()
-        {
-            Color newColor = emissiveColor;
-            // Broken
-            if (myBlock.IsFunctional == false) newColor = Color.Black;
-            // Off/No Power
-            else if (myBlock.IsWorking == false) newColor = Color.Red;
-            // Working normally
-            else if (emissiveColor != Color.Aquamarine) newColor = Color.Green;
-
-            if (newColor != emissiveColor) {
-                myBlock.SetEmissiveParts("Emissive", newColor, 1f);
-                emissiveColor = newColor;
-            }
-        }
-
-        private void UpdateAutoSort()
-        {
-            // DON'T sort containers, return
-            if (blockData.enableContainerSorting == false) return;
-
-            // Refresh cargo containers
-            _tempCargoContainerList = null;
-
-            // For all types of containers
-            foreach (ContainerCargoType containerType in Enum.GetValues(typeof(ContainerCargoType)))
+            // GET ALL UNMANAGED CONTAINERS
+            // SEPARATE CARGOS WITH META
+            // Get all cargo containers from this cubeGrid
+            var allCargoContainers = AeyosUtils.getBlocksFromGrid<IMyCargoContainer>(myBlock.CubeGrid);
+            foreach (var cargoContainer in allCargoContainers)
             {
-                // There are no containers for ORE or FILL RATE >= 99%
-                if (d_containers.ContainsKey(containerType) == false || d_containers[containerType].FillRate >= 0.99)
+                // If container has custom data, add to meta cargo container list
+                if (cargoContainer.CustomData != null && cargoContainer.CustomData.Contains("AIBM"))
                 {
-                    // Get free container
-                    var cargo = GetUnassignedContainer();
-                    
-                    // Assign container if it exists
-                    if (cargo != null)
-                    {
-                        d_containers[containerType] = new ContainerCollection { cargoContainers = new List<IMyCargoContainer> { GetUnassignedContainer() } };
-                    }
-                    else
-                    {
-                        // TODO: alert user for lack of avaialable containers
-                        // Enum.GetName(typeof(ContainerCargoType), containerType).ToString();
-                        var enumName = Enum.GetName(typeof(ContainerCargoType), containerType).ToString();
-                        AeyosLogger.MessageAll($"I need a container for {enumName}");
-                    }
+                    _tempMetaCargoContainerList.Add(cargoContainer);
+                }
+                // If container is NOT managed, add it to the unmanaged list
+                else if (d_managedContainers.ContainsKey(cargoContainer) == false)
+                {
+                    _tempCargoContainerList.Add(cargoContainer);
                 }
             }
 
-            // --MANAGE IT
-            // SORT MANAGED CONTAINERS
-            // TODO: Sort UN-MANGED containers (? - add option)
+            // SORT BY CAPACITY
+            _tempCargoContainerList.Sort((a, b) => b.GetInventory().MaxVolume.RawValue.CompareTo(a.GetInventory().MaxVolume.RawValue));
+        }
+
+        public static IMyTerminalControl CreateClearCustomDataButton()
+        {
+            var button = MyAPIGateway.TerminalControls.CreateControl<IMyTerminalControlButton, IMyTerminalBlock>("AibmBlockLogic_ClearCustomDataButton");
+            button.Title = MyStringId.GetOrCompute("clear cccdata");
+            button.Action = (cblock) => {
+                var bLogic = AibmBlockLogic.ToLogic(cblock);
+                var cargoContainers = AeyosUtils.getBlocksFromGrid<IMyCargoContainer>(cblock.CubeGrid);
+                foreach (var cargo in cargoContainers)
+                {
+                    cargo.CustomData = "";
+                }
+            };
+            return button;
         }
 
         internal static IMyTerminalControl CreateTestButton()

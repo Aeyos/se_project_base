@@ -16,8 +16,10 @@ A Space Engineers mod that adds an AI block to help you manage your base.
 - [X] Custom block for AI
   - [ ] Alternative model with projection (transparent lcd, based on block_console)
 - [X] Custom Options for AI
-  - [X] Configuration Location (Title/Data)
+  - [ ] Configuration Location (Title/Data)
   - [ ] Auto-sort containers (On/Off)
+    - [ ] Detect inaccessible / destroyed / grinded containers
+    - [ ] Allow multiple metada do co-exist
   - [ ] Auto-assign containers (On/Off)
   - [ ] Sort items alphabetically (On/Off)
   - [ ] Controlled assemblers (On/Off)
