@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using VRage.Game.ModAPI;
@@ -38,8 +39,9 @@ namespace AIBM
 
     public class AibmCargoContainerData
     {
-        public IMyTerminalBlock block = null;
+        public IMyCargoContainer block = null;
         public IMyInventory inventory = null;
+        public bool markedForDeletion = false;
 
         public bool storeOres = false;
         public bool storeIngots  = false;
@@ -69,8 +71,27 @@ namespace AIBM
             if (containerType == AibmCargoContainerType.Items) storeItems = value;
             if (containerType == AibmCargoContainerType.Bottles) storeBottles = value;
         }
-        
-        public string GetTitle()
+
+        internal void UpdateMetadata()
+        {
+            var tempData = AibmCargoContainerData.Deserialize(block.CustomData);
+            if (tempData == null)
+            {
+                markedForDeletion = true;
+                block.CustomName = block.DefinitionDisplayNameText;
+            }
+            else
+            {
+                storeOres = tempData.storeOres;
+                storeIngots = tempData.storeIngots;
+                storeComponents = tempData.storeComponents;
+                storeAmmo = tempData.storeAmmo;
+                storeItems = tempData.storeItems;
+                storeBottles = tempData.storeBottles;
+            }
+        }
+
+        public string GetTitle(string originalName)
         {
             List<string> title = new List<string>();
             if (storeOres) title.Add("Ores");
@@ -79,19 +100,19 @@ namespace AIBM
             if (storeAmmo) title.Add("Ammo");
             if (storeItems) title.Add("Items");
             if (storeBottles) title.Add("Bottles");
-            return $"Cargo Container [{string.Join(", ", title)}] ({(FillRate * 100).ToString("0.#")}%)";
+            return Regex.Replace(originalName, @"(\[.*\]|\(.*\))", "").Trim() + $" [{string.Join(", ", title)}] ({(FillRate * 100).ToString("0.#")}%)";
         }
 
         public string Serialize()
         {
             var sb = new StringBuilder();
             sb.AppendLine("AIBM");
-            sb.AppendLine($"-storeOres: {storeOres}");
-            sb.AppendLine($"-storeIngots: {storeIngots}");
-            sb.AppendLine($"-storeComponents: {storeComponents}");
-            sb.AppendLine($"-storeAmmo: {storeAmmo}");
-            sb.AppendLine($"-storeItems: {storeItems}");
-            sb.AppendLine($"-storeBottles: {storeBottles}");
+            sb.AppendLine($"[{(storeOres == true ? "X" : " ")}] Ores");
+            sb.AppendLine($"[{(storeIngots == true ? "X" : " ")}] Ingots");
+            sb.AppendLine($"[{(storeComponents == true ? "X" : " ")}] Components");
+            sb.AppendLine($"[{(storeAmmo == true ? "X" : " ")}] Ammo");
+            sb.AppendLine($"[{(storeItems == true ? "X" : " ")}] Items");
+            sb.AppendLine($"[{(storeBottles == true ? "X" : " ")}] Bottles");
             sb.AppendLine("/AIBM");
             return sb.ToString();
         }
@@ -99,18 +120,25 @@ namespace AIBM
         public static AibmCargoContainerData Deserialize(string data)
         {
             var cargoContainer = new AibmCargoContainerData();
-            var dictionary = data.Split('\n')
-                .Select(x => x.Split(':').Select(y => y.Trim()).ToArray())
+            var startDataBlock = data.IndexOf("AIBM");
+
+            if (startDataBlock == -1) return null;
+
+            var metadata = data
+                .Split('\n')
+                .Select(x => x.Split(' ').Select(y => y.Trim()).ToArray())
                 .Where(x => x.Length > 1)
-                .ToDictionary(x => x[0].Substring(1, x[0].Length - 1), x => x[1]);
-            foreach (KeyValuePair<string, string> d in dictionary)
+                .Select(x => x.First().ToUpper() == "[X]" ? x.Last() : null)
+                .Where(x => x != null);
+
+            foreach (var x in metadata)
             {
-                if (d.Key == "storeOres") cargoContainer.storeOres = Boolean.Parse(d.Value);
-                if (d.Key == "storeIngots") cargoContainer.storeIngots = Boolean.Parse(d.Value);
-                if (d.Key == "storeComponents") cargoContainer.storeComponents = Boolean.Parse(d.Value);
-                if (d.Key == "storeAmmo") cargoContainer.storeAmmo = Boolean.Parse(d.Value);
-                if (d.Key == "storeItems") cargoContainer.storeItems = Boolean.Parse(d.Value);
-                if (d.Key == "storeBottles") cargoContainer.storeBottles = Boolean.Parse(d.Value);
+                if (x == "Ores") cargoContainer.storeOres = true;
+                if (x == "Ingots") cargoContainer.storeIngots = true;
+                if (x == "Components") cargoContainer.storeComponents = true;
+                if (x == "Ammo") cargoContainer.storeAmmo = true;
+                if (x == "Items") cargoContainer.storeItems = true;
+                if (x == "Bottles") cargoContainer.storeBottles = true;
             }
 
             return cargoContainer;

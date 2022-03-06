@@ -37,8 +37,7 @@ namespace AIBM
         public Color emissiveColor;
         public IMyTerminalBlock myBlock;
         private bool _init = false;
-        private readonly Dictionary<IMyCargoContainer, bool> d_managedContainers = new Dictionary<IMyCargoContainer,bool>();
-        private AibmCargoContainerCollection d_containers = new AibmCargoContainerCollection();
+        private AibmCargoContainerCollection myContainers = new AibmCargoContainerCollection();
         private List<IMyCargoContainer> _tempCargoContainerList;
         private List<IMyCargoContainer> _tempMetaCargoContainerList;
 
@@ -63,6 +62,7 @@ namespace AIBM
             if (_init == false) return;
             UpdateEmissiveColor();
             UpdateAutoSort();
+            UpdateContainerTitles();
         }
         
         private void UpdateEmissiveColor()
@@ -94,8 +94,8 @@ namespace AIBM
             // For all unmanaged cargos that have customData
             foreach (IMyCargoContainer cargo in _tempMetaCargoContainerList)
             {
-                // Manage them
-                d_containers.Add(cargo);
+                // Manage them (skips if already managed)
+                myContainers.Add(cargo);
             }
 
             // CHECK FILL RATES FOR MANAGED CONTAINERS
@@ -105,7 +105,7 @@ namespace AIBM
                 var enumName = Enum.GetName(typeof(AibmCargoContainerType), cargoContainerType).ToString();
 
                 // There are no containers for TYPE or FILL RATE >= 95%
-                if (d_containers.GetFillRate(cargoContainerType) >= 0.95)
+                if (myContainers.GetFillRate(cargoContainerType) >= 0.95)
                 {
                     // Get free container
                     var cargo = GetUnassignedContainer();
@@ -113,7 +113,7 @@ namespace AIBM
                     // Assign container if it exists
                     if (cargo != null)
                     {
-                        d_containers.Add(cargo, cargoContainerType);
+                        myContainers.Add(cargo, cargoContainerType);
                     }
                     else
                     {
@@ -122,20 +122,19 @@ namespace AIBM
                         // AeyosLogger.MessageAll($"I need a container for {enumName}");
                     }
                 }
-
-                //if (d_containers.ContainsKey(containerType) == true)
-                //{
-                //    foreach (var container in d_containers[containerType].cargoContainers)
-                //    {
-                //        container.CustomName = $"Container for: {enumName}";
-                //        container.
-                //    }
-                //}
             }
 
-            // DISCOVER UNCONTROLLED CARGOS WITH METADATA
+            // UPDATE METDATA
+            myContainers.UpdateMetadata();
+
             // SORT MANAGED CONTAINERS
+            // UPDATE TITLE
+
             // TODO: Sort UN-MANGED containers (? - add option)
+        }
+
+        private void UpdateContainerTitles() {
+            myContainers.UpdateTitle();
         }
 
         IMyCargoContainer GetUnassignedContainer()
@@ -170,7 +169,7 @@ namespace AIBM
                     _tempMetaCargoContainerList.Add(cargoContainer);
                 }
                 // If container is NOT managed, add it to the unmanaged list
-                else if (d_managedContainers.ContainsKey(cargoContainer) == false)
+                else
                 {
                     _tempCargoContainerList.Add(cargoContainer);
                 }
