@@ -1,14 +1,18 @@
-﻿using Sandbox.ModAPI;
+﻿using Sandbox.Definitions;
+using Sandbox.ModAPI;
 using Sandbox.ModAPI.Interfaces.Terminal;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using VRage.Game;
 using VRage.Game.ModAPI;
+using VRage.Game.ModAPI.Ingame;
 using VRage.ModAPI;
 using VRage.Utils;
 
@@ -40,16 +44,36 @@ namespace AIBM
     public class AibmCargoContainerData
     {
         public IMyCargoContainer block = null;
-        public IMyInventory inventory = null;
+        public VRage.Game.ModAPI.IMyInventory inventory = null;
         public bool markedForDeletion = false;
 
         public bool storeOres = false;
-        public bool storeIngots  = false;
-        public bool storeComponents  = false;
-        public bool storeAmmo  = false;
-        public bool storeItems  = false;
-        public bool storeBottles  = false;
+        public bool storeIngots = false;
+        public bool storeComponents = false;
+        public bool storeAmmo = false;
+        public bool storeItems = false;
+        public bool storeBottles = false;
         public double FillRate { get { return (double)inventory.CurrentVolume / (double)inventory.MaxVolume; } }
+        public static Dictionary<MyItemType, string> itemNameByType;
+        public static Dictionary<string, byte> ItemTypeSortOrder = new Dictionary<string, byte> {
+            { "MyObjectBuilder_OxygenContainerObject", 0 },
+            { "MyObjectBuilder_GasContainerObject", 1 },
+            { "MyObjectBuilder_ConsumableItem", 2 },
+            { "MyObjectBuilder_PhysicalGunObject", 3 },
+            { "MyObjectBuilder_AmmoMagazine", 4 },
+            { "MyObjectBuilder_Datapad", 5 },
+            { "MyObjectBuilder_Package", 6 },
+            { "MyObjectBuilder_Component", 7 },
+            { "MyObjectBuilder_Ingot", 8 },
+            { "MyObjectBuilder_Ore", 9 },
+            { "MyObjectBuilder_PhysicalObject", 10 },
+        };
+        public static HashSet<string> ItemTypeNonStackable = new HashSet<string>
+        {
+            "MyObjectBuilder_OxygenContainerObject",
+            "MyObjectBuilder_GasContainerObject",
+            "MyObjectBuilder_PhysicalGunObject"
+        };
 
         public bool CanStore(AibmCargoContainerType containerType)
         {
@@ -70,6 +94,21 @@ namespace AIBM
             if (containerType == AibmCargoContainerType.Ammo) storeAmmo = value;
             if (containerType == AibmCargoContainerType.Items) storeItems = value;
             if (containerType == AibmCargoContainerType.Bottles) storeBottles = value;
+        }
+        public bool InitItemNames()
+        {
+            if (itemNameByType != null) return false;
+            if (itemNameByType == null) itemNameByType = new Dictionary<MyItemType, string>();
+            foreach (MyPhysicalItemDefinition myPhysicalItemDefinition in from MyPhysicalItemDefinition e in
+                                                                              from e in MyDefinitionManager.Static.GetAllDefinitions()
+                                                                              where e is MyPhysicalItemDefinition && e.Public
+                                                                              select e
+                                                                          orderby e.DisplayNameText
+                                                                          select e)
+            {
+                itemNameByType.Add(new MyItemType(myPhysicalItemDefinition.Id.TypeId, myPhysicalItemDefinition.Id.SubtypeId), myPhysicalItemDefinition.DisplayNameText);
+            }
+            return true;
         }
 
         internal void UpdateMetadata()
@@ -103,6 +142,75 @@ namespace AIBM
             return Regex.Replace(originalName, @"(\[.*\]|\(.*\))", "").Trim() + $" [{string.Join(", ", title)}] ({(FillRate * 100).ToString("0.#")}%)";
         }
 
+        internal void SortInventory()
+        {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            // Get list of items
+            var sourceList = new List<VRage.Game.ModAPI.Ingame.MyInventoryItem>();
+            var azList = new List<VRage.Game.ModAPI.Ingame.MyInventoryItem>();
+            inventory.GetItems(sourceList);
+            inventory.GetItems(azList);
+            
+            AeyosLogger.Log($"Generating lists: {stopWatch.ElapsedTicks}");
+            stopWatch.Restart();
+            
+            if (inventory.ItemCount <= 0) return;
+            // Init translated names, expensive operation, try sorting next frame
+            if (InitItemNames())
+            {
+                AeyosLogger.Log($"InitNames: {stopWatch.ElapsedTicks}");
+                stopWatch.Restart();
+                return;
+            }
+
+            // Sort from A-Z based on type and then by name
+            azList.Sort((a, b) => {
+                if (a.Type.TypeId != b.Type.TypeId)
+                {
+                    return ItemTypeSortOrder[a.Type.TypeId].CompareTo(ItemTypeSortOrder[b.Type.TypeId]);
+                }
+                return itemNameByType[a.Type].CompareTo(itemNameByType[b.Type]);
+            });
+
+            AeyosLogger.Log($"AzSort: {stopWatch.ElapsedTicks}");
+            stopWatch.Restart();
+
+            // Already sorted
+            if (azList.Select(x => x.Type.SubtypeId).SequenceEqual(sourceList.Select(x => x.Type.SubtypeId)))
+            {
+                AeyosLogger.Log($"Skipping sort");
+                return;
+            }
+
+            int itemCount = azList.Count;
+            // Repeat while there are items to sort
+            for (; azList.Count > 0;)
+            {
+                // Get item index on inventory
+                var sourceItemIndex = sourceList.IndexOf(azList[0]);
+                // Get item being sorted
+                var item = azList[0];
+                // Remove items from list
+                azList.RemoveAt(0);
+                sourceList.RemoveAt(sourceItemIndex);
+
+                // If type of next item to sort is the same as the last item to sort AND it is stackable
+                if (inventory.GetItemAt(inventory.ItemCount - 1).Value.Type == item.Type && ItemTypeNonStackable.Contains(item.Type.TypeId) == false)
+                {
+                    // Move sorting item to stack
+                    inventory.TransferItemTo(inventory, sourceItemIndex: sourceItemIndex, targetItemIndex: inventory.ItemCount - 1, stackIfPossible: true);
+                } else {
+                    // Move item to last slot
+                    inventory.TransferItemTo(inventory, sourceItemIndex: sourceItemIndex, targetItemIndex: inventory.ItemCount + 1, stackIfPossible: true);
+                }
+            }
+
+            AeyosLogger.Log($"Cargo rearranging: {stopWatch.ElapsedTicks}");
+            stopWatch.Stop();
+
+        }
+
         public string Serialize()
         {
             var sb = new StringBuilder();
@@ -116,7 +224,7 @@ namespace AIBM
             sb.AppendLine("/AIBM");
             return sb.ToString();
         }
-
+        
         public static AibmCargoContainerData Deserialize(string data)
         {
             var cargoContainer = new AibmCargoContainerData();

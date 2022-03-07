@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -62,7 +63,6 @@ namespace AIBM
             if (_init == false) return;
             UpdateEmissiveColor();
             UpdateAutoSort();
-            UpdateContainerTitles();
         }
         
         private void UpdateEmissiveColor()
@@ -86,7 +86,9 @@ namespace AIBM
         {
             // DON'T auto-sort containers, return
             if (blockData.enableContainerSorting == false) return;
+            Stopwatch stopwatch = new Stopwatch();
 
+            stopwatch.Start();
             // Refresh cargo containers
             RefreshCargoContainerLists();
 
@@ -128,7 +130,12 @@ namespace AIBM
             myContainers.UpdateMetadata();
 
             // SORT MANAGED CONTAINERS
+            myContainers.SortAlphabetically();
+
             // UPDATE TITLE
+            UpdateContainerTitles();
+            stopwatch.Stop();
+            AeyosLogger.MessageAll($"Sorting took: {stopwatch.ElapsedMilliseconds}ms");
 
             // TODO: Sort UN-MANGED containers (? - add option)
         }
@@ -176,7 +183,7 @@ namespace AIBM
             }
 
             // SORT BY CAPACITY
-            _tempCargoContainerList.Sort((a, b) => b.GetInventory().MaxVolume.RawValue.CompareTo(a.GetInventory().MaxVolume.RawValue));
+            _tempCargoContainerList.Sort((a, b) => b.GetInventory().MaxVolume.ToIntSafe().CompareTo(a.GetInventory().MaxVolume.ToIntSafe()));
         }
 
         public static IMyTerminalControl CreateClearCustomDataButton()

@@ -38,6 +38,10 @@ namespace AIBM
                 WriteToFile("Error", $"{data} {e.Message}\n{e.StackTrace}");
             }
         }
+        static public void Error(string data, string errorDescription)
+        {
+            WriteToFile("Error", errorDescription);
+        }
 
         static private void WriteToFile(string type, string data)
         {

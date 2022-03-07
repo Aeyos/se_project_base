@@ -87,5 +87,13 @@ namespace AIBM
                 ccData.block.CustomName = ccData.GetTitle(ccData.block.CustomName);
             }
         }
+
+        internal void SortAlphabetically()
+        {
+            foreach (var ccData in aibmCargoContainersData)
+            {
+                ccData.SortInventory();
+            }
+        }
     }
 }
