@@ -29,8 +29,6 @@ using VRageMath;
 
 namespace AIBM
 {
-
-
     [MyEntityComponentDescriptor(typeof(MyObjectBuilder_LCDPanelsBlock), false, AibmModMain.MainBlockSubtypeId)]
     public class AibmBlockLogic : MyGameLogicComponent {
         public AibmBlockData blockData;
@@ -41,6 +39,8 @@ namespace AIBM
         private AibmCargoContainerCollection myContainers = new AibmCargoContainerCollection();
         private List<IMyCargoContainer> _tempCargoContainerList;
         private List<IMyCargoContainer> _tempMetaCargoContainerList;
+        private const int coldStartTime = 4 /* 100th frame */;
+        private int coldStartCount = 0;
 
         internal static AibmBlockLogic ToLogic(IMyTerminalBlock block)
         {
@@ -60,9 +60,19 @@ namespace AIBM
         public override void UpdateBeforeSimulation100()
         {
             base.UpdateBeforeSimulation100();
-            if (_init == false) return;
+            if (_init == false || coldStartCount <= coldStartTime)
+            {
+                coldStartCount += 1;
+                return;
+            }
             UpdateEmissiveColor();
-            UpdateAutoSort();
+            try
+            {
+                UpdateAutoSort();
+            } catch (Exception ex)
+            {
+                AeyosLogger.Error("Update auto sort error", ex);
+            }
         }
         
         private void UpdateEmissiveColor()
@@ -102,13 +112,13 @@ namespace AIBM
 
             // CHECK FILL RATES FOR MANAGED CONTAINERS
             // For all types of containers
-            foreach (AibmCargoContainerType cargoContainerType in Enum.GetValues(typeof(AibmCargoContainerType)))
+            foreach (CCStoreType cargoContainerType in Enum.GetValues(typeof(CCStoreType)))
             {
-                var enumName = Enum.GetName(typeof(AibmCargoContainerType), cargoContainerType).ToString();
-
+                var enumName = Enum.GetName(typeof(CCStoreType), cargoContainerType).ToString();
                 // There are no containers for TYPE or FILL RATE >= 95%
                 if (myContainers.GetFillRate(cargoContainerType) >= 0.95)
                 {
+
                     // Get free container
                     var cargo = GetUnassignedContainer();
 
@@ -120,7 +130,7 @@ namespace AIBM
                     else
                     {
                         // TODO: alert user for lack of avaialable containers
-                        // Enum.GetName(typeof(AibmCargoContainerType), containerType).ToString();
+                        // Enum.GetName(typeof(StoreType), containerType).ToString();
                         // AeyosLogger.MessageAll($"I need a container for {enumName}");
                     }
                 }
@@ -129,11 +139,15 @@ namespace AIBM
             // UPDATE METDATA
             myContainers.UpdateMetadata();
 
+            // TRANSFER ITEMS
+            myContainers.TransferItems();
+
             // SORT MANAGED CONTAINERS
             myContainers.SortAlphabetically();
 
             // UPDATE TITLE
             UpdateContainerTitles();
+
             stopwatch.Stop();
             AeyosLogger.MessageAll($"Sorting took: {stopwatch.ElapsedMilliseconds}ms");
 

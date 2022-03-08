@@ -119,6 +119,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AibmCargoContainerCollection.cs" />
+    <Compile Include="AibmCCData.cs" />
     <Compile Include="AibmModLogic.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>

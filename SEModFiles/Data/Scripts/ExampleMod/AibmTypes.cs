@@ -24,16 +24,6 @@ namespace AIBM
         LowOnItems,
     }
 
-    public enum AibmCargoContainerType : byte
-    {
-        Components = 1,
-        Ingots = 2,
-        Ores = 4,
-        Ammo = 8,
-        Items = 16,
-        Bottles = 32,
-    }
-
     public class AibmAlertMessages
     {
         public AibmAlertMessageType type;
@@ -41,21 +31,21 @@ namespace AIBM
         public long targetId;
     }
 
-    public class AibmCargoContainerData
+    public enum CCStoreType
     {
-        public IMyCargoContainer block = null;
-        public VRage.Game.ModAPI.IMyInventory inventory = null;
-        public bool markedForDeletion = false;
+        Ores = 1,
+        Ingots,
+        Components,
+        Ammo,
+        Items,
+        Bottles,
+        Misc,
+    }
 
-        public bool storeOres = false;
-        public bool storeIngots = false;
-        public bool storeComponents = false;
-        public bool storeAmmo = false;
-        public bool storeItems = false;
-        public bool storeBottles = false;
-        public double FillRate { get { return (double)inventory.CurrentVolume / (double)inventory.MaxVolume; } }
-        public static Dictionary<MyItemType, string> itemNameByType;
-        public static Dictionary<string, byte> ItemTypeSortOrder = new Dictionary<string, byte> {
+    public static class AibmCCUtils
+    {
+        public static Dictionary<string, byte> ItemTypeSortOrder = new Dictionary<string, byte>
+        {
             { "MyObjectBuilder_OxygenContainerObject", 0 },
             { "MyObjectBuilder_GasContainerObject", 1 },
             { "MyObjectBuilder_ConsumableItem", 2 },
@@ -68,188 +58,56 @@ namespace AIBM
             { "MyObjectBuilder_Ore", 9 },
             { "MyObjectBuilder_PhysicalObject", 10 },
         };
-        public static HashSet<string> ItemTypeNonStackable = new HashSet<string>
+
+        public static Dictionary<MyItemType, MyPhysicalItemDefinition> ItemDefinitions = null;
+
+        public static Dictionary<CCStoreType, string[]> CCStoreTypeToItemTypeIds = new Dictionary<CCStoreType, string[]>
         {
-            "MyObjectBuilder_OxygenContainerObject",
-            "MyObjectBuilder_GasContainerObject",
-            "MyObjectBuilder_PhysicalGunObject"
+            { CCStoreType.Ores, new string[] { "MyObjectBuilder_Ore" } },
+            { CCStoreType.Ingots, new string[] {"MyObjectBuilder_Ingot" } },
+            { CCStoreType.Components, new string[] { "MyObjectBuilder_Component" } },
+            { CCStoreType.Ammo, new string[] { "MyObjectBuilder_AmmoMagazine" } },
+            { CCStoreType.Items, new string[] { "MyObjectBuilder_PhysicalGunObject" } },
+            { CCStoreType.Bottles, new string[] { "MyObjectBuilder_OxygenContainerObject", "MyObjectBuilder_GasContainerObject" } },
+            { CCStoreType.Misc, new string[] { "MyObjectBuilder_ConsumableItem", "MyObjectBuilder_Datapad", "MyObjectBuilder_Package", "MyObjectBuilder_PhysicalObject" } },
         };
 
-        public bool CanStore(AibmCargoContainerType containerType)
+        public static bool InitItemNames()
         {
-            if (containerType == AibmCargoContainerType.Ores) return storeOres;
-            if (containerType == AibmCargoContainerType.Ingots) return storeIngots;
-            if (containerType == AibmCargoContainerType.Components) return storeComponents;
-            if (containerType == AibmCargoContainerType.Ammo) return storeAmmo;
-            if (containerType == AibmCargoContainerType.Items) return storeItems;
-            if (containerType == AibmCargoContainerType.Bottles) return storeBottles;
-            return false;
-        }
+            if (ItemDefinitions != null) return false;
+            if (ItemDefinitions == null) ItemDefinitions = new Dictionary<MyItemType, MyPhysicalItemDefinition>();
 
-        public void SetStoreTypes(AibmCargoContainerType containerType, bool value)
-        {
-            if (containerType == AibmCargoContainerType.Ores) storeOres = value;
-            if (containerType == AibmCargoContainerType.Ingots) storeIngots = value;
-            if (containerType == AibmCargoContainerType.Components) storeComponents = value;
-            if (containerType == AibmCargoContainerType.Ammo) storeAmmo = value;
-            if (containerType == AibmCargoContainerType.Items) storeItems = value;
-            if (containerType == AibmCargoContainerType.Bottles) storeBottles = value;
-        }
-        public bool InitItemNames()
-        {
-            if (itemNameByType != null) return false;
-            if (itemNameByType == null) itemNameByType = new Dictionary<MyItemType, string>();
-            foreach (MyPhysicalItemDefinition myPhysicalItemDefinition in from MyPhysicalItemDefinition e in
-                                                                              from e in MyDefinitionManager.Static.GetAllDefinitions()
-                                                                              where e is MyPhysicalItemDefinition && e.Public
-                                                                              select e
-                                                                          orderby e.DisplayNameText
-                                                                          select e)
+            var validItems = MyDefinitionManager.Static.GetAllDefinitions().Where(x => x.Public && x is MyPhysicalItemDefinition);
+
+            foreach (MyAssemblerDefinition s in MyDefinitionManager.Static.GetAllDefinitions().Where(x => x.Public && x is MyAssemblerDefinition))
             {
-                itemNameByType.Add(new MyItemType(myPhysicalItemDefinition.Id.TypeId, myPhysicalItemDefinition.Id.SubtypeId), myPhysicalItemDefinition.DisplayNameText);
+                //MyBlueprintDefinition.
+                AeyosLogger.Log($"{s.DisplayNameText} - Speed:{s.AssemblySpeed}, Priority {s.AssemblySpeed} --- {s}");
+                foreach(MyBlueprintClassDefinition bptab in s.BlueprintClasses.Where(x => x.AvailableInSurvival && x.Enabled && x.Public))
+                {
+                    AeyosLogger.Log($"-----TAB {bptab.DisplayNameText}");
+                    foreach (var bp in bptab.Where(x => x.AvailableInSurvival && x.Enabled && x.Public))
+                    {
+                        AeyosLogger.Log($"--------------- {bp.DisplayNameText} ({bp.Id})");
+                    }
+
+                }
+            }
+            //foreach (var s in MyDefinitionManager.Static.GetAllDefinitions<MyBlueprintDefinition>().ToList().Select(x => $"{x.DisplayNameText} - Speed:{x.BaseProductionTimeInSeconds}, Priority {x.Priority}"))
+            //{
+            //    AeyosLogger.Log(s);
+            //}
+
+            foreach (MyPhysicalItemDefinition item in validItems)
+            {
+                ItemDefinitions.Add(new MyItemType(item.Id.TypeId, item.Id.SubtypeId), item);
             }
             return true;
         }
 
-        internal void UpdateMetadata()
+        public static bool IsItemStackable(MyItemType itemType)
         {
-            var tempData = AibmCargoContainerData.Deserialize(block.CustomData);
-            if (tempData == null)
-            {
-                markedForDeletion = true;
-                block.CustomName = block.DefinitionDisplayNameText;
-            }
-            else
-            {
-                storeOres = tempData.storeOres;
-                storeIngots = tempData.storeIngots;
-                storeComponents = tempData.storeComponents;
-                storeAmmo = tempData.storeAmmo;
-                storeItems = tempData.storeItems;
-                storeBottles = tempData.storeBottles;
-            }
-        }
-
-        public string GetTitle(string originalName)
-        {
-            List<string> title = new List<string>();
-            if (storeOres) title.Add("Ores");
-            if (storeIngots) title.Add("Ingots");
-            if (storeComponents) title.Add("Components");
-            if (storeAmmo) title.Add("Ammo");
-            if (storeItems) title.Add("Items");
-            if (storeBottles) title.Add("Bottles");
-            return Regex.Replace(originalName, @"(\[.*\]|\(.*\))", "").Trim() + $" [{string.Join(", ", title)}] ({(FillRate * 100).ToString("0.#")}%)";
-        }
-
-        internal void SortInventory()
-        {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-            // Get list of items
-            var sourceList = new List<VRage.Game.ModAPI.Ingame.MyInventoryItem>();
-            var azList = new List<VRage.Game.ModAPI.Ingame.MyInventoryItem>();
-            inventory.GetItems(sourceList);
-            inventory.GetItems(azList);
-            
-            AeyosLogger.Log($"Generating lists: {stopWatch.ElapsedTicks}");
-            stopWatch.Restart();
-            
-            if (inventory.ItemCount <= 0) return;
-            // Init translated names, expensive operation, try sorting next frame
-            if (InitItemNames())
-            {
-                AeyosLogger.Log($"InitNames: {stopWatch.ElapsedTicks}");
-                stopWatch.Restart();
-                return;
-            }
-
-            // Sort from A-Z based on type and then by name
-            azList.Sort((a, b) => {
-                if (a.Type.TypeId != b.Type.TypeId)
-                {
-                    return ItemTypeSortOrder[a.Type.TypeId].CompareTo(ItemTypeSortOrder[b.Type.TypeId]);
-                }
-                return itemNameByType[a.Type].CompareTo(itemNameByType[b.Type]);
-            });
-
-            AeyosLogger.Log($"AzSort: {stopWatch.ElapsedTicks}");
-            stopWatch.Restart();
-
-            // Already sorted
-            if (azList.Select(x => x.Type.SubtypeId).SequenceEqual(sourceList.Select(x => x.Type.SubtypeId)))
-            {
-                AeyosLogger.Log($"Skipping sort");
-                return;
-            }
-
-            int itemCount = azList.Count;
-            // Repeat while there are items to sort
-            for (; azList.Count > 0;)
-            {
-                // Get item index on inventory
-                var sourceItemIndex = sourceList.IndexOf(azList[0]);
-                // Get item being sorted
-                var item = azList[0];
-                // Remove items from list
-                azList.RemoveAt(0);
-                sourceList.RemoveAt(sourceItemIndex);
-
-                // If type of next item to sort is the same as the last item to sort AND it is stackable
-                if (inventory.GetItemAt(inventory.ItemCount - 1).Value.Type == item.Type && ItemTypeNonStackable.Contains(item.Type.TypeId) == false)
-                {
-                    // Move sorting item to stack
-                    inventory.TransferItemTo(inventory, sourceItemIndex: sourceItemIndex, targetItemIndex: inventory.ItemCount - 1, stackIfPossible: true);
-                } else {
-                    // Move item to last slot
-                    inventory.TransferItemTo(inventory, sourceItemIndex: sourceItemIndex, targetItemIndex: inventory.ItemCount + 1, stackIfPossible: true);
-                }
-            }
-
-            AeyosLogger.Log($"Cargo rearranging: {stopWatch.ElapsedTicks}");
-            stopWatch.Stop();
-
-        }
-
-        public string Serialize()
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("AIBM");
-            sb.AppendLine($"[{(storeOres == true ? "X" : " ")}] Ores");
-            sb.AppendLine($"[{(storeIngots == true ? "X" : " ")}] Ingots");
-            sb.AppendLine($"[{(storeComponents == true ? "X" : " ")}] Components");
-            sb.AppendLine($"[{(storeAmmo == true ? "X" : " ")}] Ammo");
-            sb.AppendLine($"[{(storeItems == true ? "X" : " ")}] Items");
-            sb.AppendLine($"[{(storeBottles == true ? "X" : " ")}] Bottles");
-            sb.AppendLine("/AIBM");
-            return sb.ToString();
-        }
-        
-        public static AibmCargoContainerData Deserialize(string data)
-        {
-            var cargoContainer = new AibmCargoContainerData();
-            var startDataBlock = data.IndexOf("AIBM");
-
-            if (startDataBlock == -1) return null;
-
-            var metadata = data
-                .Split('\n')
-                .Select(x => x.Split(' ').Select(y => y.Trim()).ToArray())
-                .Where(x => x.Length > 1)
-                .Select(x => x.First().ToUpper() == "[X]" ? x.Last() : null)
-                .Where(x => x != null);
-
-            foreach (var x in metadata)
-            {
-                if (x == "Ores") cargoContainer.storeOres = true;
-                if (x == "Ingots") cargoContainer.storeIngots = true;
-                if (x == "Components") cargoContainer.storeComponents = true;
-                if (x == "Ammo") cargoContainer.storeAmmo = true;
-                if (x == "Items") cargoContainer.storeItems = true;
-                if (x == "Bottles") cargoContainer.storeBottles = true;
-            }
-
-            return cargoContainer;
+            return ItemDefinitions[itemType].MaxStackAmount > 1;
         }
     }
 

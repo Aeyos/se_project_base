@@ -20,6 +20,11 @@ namespace AIBM
         const string LogFileName = "AeyosUtilsLog.txt";
         static TextWriter writer;
 
+        static public void Benachmark(string data)
+        {
+            WriteToFile("Benchmark", data);
+        }
+
         static public void Log(string data)
         {
             WriteToFile("Log", data);
@@ -35,7 +40,7 @@ namespace AIBM
             if (e == null) {
                 WriteToFile("Error", $"{data} (Exception e is \"null\")");
             } else {
-                WriteToFile("Error", $"{data} {e.Message}\n{e.StackTrace}");
+                WriteToFile("Error", $"{data} {e.Message}\n---------------\n{e.InnerException}\n---------------\n{e.Source}\n---------------\n{e.StackTrace}");
             }
         }
         static public void Error(string data, string errorDescription)
