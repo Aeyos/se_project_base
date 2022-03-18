@@ -23,6 +23,10 @@ A Space Engineers mod that adds an AI block to help you manage your base.
   - [X] Auto-assign containers (On/Off)
   - [X] Sort items alphabetically (On/Off)
   - [ ] Controlled assemblers (On/Off)
+    - [ ] Clear items
+    - [ ] Clear queue
+    - [ ] Assemble items needed
+    - [ ] Disassemble excess
   - [ ] Auto-adjust solar panels (On/Off)
   - [ ] Auto-close doors (On/Off)
   - [ ] Low item alerts (On/Off)
@@ -40,7 +44,7 @@ A Space Engineers mod that adds an AI block to help you manage your base.
   - [ ] Name your AI for custom messages
   - [ ] Custom AI faces
     - [X] Abot
-    - [ ] wAIfu
+    - [ ] wA.I.fu
     - [ ] Ram/Rem (possibly addon/second mod)
     - [ ] ZeroTwo (possibly addon/second mod)
     - [ ] EVA from WALL-E (possibly addon/second mod)

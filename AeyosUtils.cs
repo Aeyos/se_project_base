@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VRage.Game.ModAPI;
-using Sandbox.ModAPI;
-using VRageMath;
-using System.ComponentModel;
-using Sandbox.ModAPI.Interfaces.Terminal;
-using VRage.Utils;
-using Sandbox.Game.Gui;
+using System;
 using Sandbox.Game;
+using Sandbox.ModAPI.Interfaces.Terminal;
+using Sandbox.ModAPI;
+using VRage.Game.ModAPI;
+using VRage.Utils;
+using VRageMath;
 
 namespace AIBM
 {

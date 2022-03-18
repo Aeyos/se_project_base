@@ -48,7 +48,7 @@ namespace AIBM
                 foreach (var item in this.CustomControls)
                 {
                     // ownControls.Add(item);
-                    ownControls.Insert(8 + CustomControls.IndexOf(item), item);
+                    //ownControls.Insert(8 + CustomControls.IndexOf(item), item);
                 }
             }
         }

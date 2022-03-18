@@ -118,6 +118,8 @@
     <None Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AibmAssemblerCollection.cs" />
+    <Compile Include="AibmAssemblerData.cs" />
     <Compile Include="AibmCargoContainerCollection.cs" />
     <Compile Include="AibmCCData.cs" />
     <Compile Include="AibmModLogic.cs">
